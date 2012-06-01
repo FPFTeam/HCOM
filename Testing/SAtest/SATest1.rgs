@@ -1,0 +1,27 @@
+HKCR
+{
+	SAtest.SATest.1 = s 'SATest Class'
+	{
+		CLSID = s '{50C1BE3B-1298-4D57-A781-2212EBFFD961}'
+	}
+	SAtest.SATest = s 'SATest Class'
+	{
+		CLSID = s '{50C1BE3B-1298-4D57-A781-2212EBFFD961}'
+		CurVer = s 'SAtest.SATest.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {50C1BE3B-1298-4D57-A781-2212EBFFD961} = s 'SATest Class'
+		{
+			ProgID = s 'SAtest.SATest.1'
+			VersionIndependentProgID = s 'SAtest.SATest'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{A5EFD00B-B1AD-429D-8018-AB69E0181404}'
+		}
+	}
+}

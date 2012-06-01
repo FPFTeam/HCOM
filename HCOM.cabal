@@ -1,0 +1,62 @@
+name: HCOM
+version: 0.2.1
+cabal-version: -any
+build-type: Simple
+license: BSD3
+license-file: LICENSE
+copyright:
+maintainer:
+build-depends: base >4, mtl >1, time >1, bytestring >0.9
+stability:
+homepage:
+package-url:
+bug-reports:
+synopsis: An interface to COM
+description: .
+             .
+category:
+author:
+tested-with:
+data-files:
+data-dir: ""
+extra-source-files:
+extra-tmp-files:
+exposed-modules: System.Win32.HCOM
+                 System.Win32.HCOM.Gen.IDictionary
+exposed: True
+buildable: True
+build-tools:
+cpp-options:
+cc-options:
+ld-options:
+pkgconfig-depends:
+frameworks:
+c-sources: src/System/Win32/HCOM/Thunk.s
+extensions:
+extra-libraries: ole32 oleaut32
+extra-lib-dirs:
+includes:
+install-includes:
+include-dirs:
+hs-source-dirs: src
+other-modules: System.Win32.HCOM.BSTR
+               System.Win32.HCOM.COMCall
+               System.Win32.HCOM.COMPtr
+               System.Win32.HCOM.ErrorBase
+               System.Win32.HCOM.ErrorUtils
+               System.Win32.HCOM.Flatten
+               System.Win32.HCOM.Functions
+               System.Win32.HCOM.GUID
+               System.Win32.HCOM.RawFunctions
+               System.Win32.HCOM.Stack
+               System.Win32.HCOM.Variant
+               System.Win32.HCOM.VariantConversion
+               System.Win32.HCOM.SafeArray
+               System.Win32.HCOM.Tags
+               System.Win32.HCOM.Extras
+ghc-prof-options:
+ghc-shared-options:
+ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind -Werror
+hugs-options:
+nhc98-options:
+jhc-options:

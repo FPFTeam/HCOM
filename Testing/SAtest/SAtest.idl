@@ -1,0 +1,55 @@
+// SAtest.idl : IDL source for SAtest
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (SAtest.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(AF45C527-4B2E-4030-83C1-2E99923F4441),
+	dual,
+	nonextensible,
+	helpstring("ISATest Interface"),
+	pointer_default(unique)
+]
+interface ISATest : IDispatch{
+
+    // Test in and out parameters
+    HRESULT MySAFunc1([in] SAFEARRAY(int) array);
+    HRESULT MySAFunc2([in, out] SAFEARRAY(short) array);
+    HRESULT MySAFunc3([out] SAFEARRAY(unsigned char) *pArray);
+
+    // Test multi-dim arrays.
+    HRESULT MySAFunc4([in] SAFEARRAY(int) array, [out] int *pRes);
+
+    // Test boolean arrays...
+    HRESULT TestBool([in, out] SAFEARRAY(BOOL) array);
+    // Test string arrays...
+    HRESULT TestBSTR([in, out] SAFEARRAY(BSTR) array);
+    // Test object arrays...
+    HRESULT TestUnk([in, out] SAFEARRAY(IUnknown *) array);
+    // Test variant arrays...
+    HRESULT TestVariant([in, out] SAFEARRAY(VARIANT) array);
+    // General test of passing variants through...
+    HRESULT TestV([in, out] VARIANT *pVar);
+};
+[
+	uuid(A5EFD00B-B1AD-429D-8018-AB69E0181404),
+	version(1.0),
+	helpstring("SAtest 1.0 Type Library")
+]
+library SAtestLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(50C1BE3B-1298-4D57-A781-2212EBFFD961),
+		helpstring("SATest Class")
+	]
+	coclass SATest
+	{
+		[default] interface ISATest;
+	};
+};

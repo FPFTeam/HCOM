@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SAtest", "SAtest\SAtest.vcproj", "{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SAtestPS", "SAtest\SAtestPS.vcproj", "{F6D71DD8-1AAE-4CFD-93EC-3606489ECBF8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147} = {6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}.Debug|Win32.Build.0 = Debug|Win32
+		{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}.Release|Win32.ActiveCfg = Release|Win32
+		{6DAFBF44-AB70-44D0-9DDE-55BC43EDB147}.Release|Win32.Build.0 = Release|Win32
+		{F6D71DD8-1AAE-4CFD-93EC-3606489ECBF8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F6D71DD8-1AAE-4CFD-93EC-3606489ECBF8}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
