@@ -33,8 +33,9 @@ import Control.Category hiding ((.), id)
 import Control.Exception
 import Control.Monad hiding (void)
 import Control.Monad.Trans
-import Foreign hiding (newForeignPtr)
+import Foreign hiding (newForeignPtr, unsafePerformIO)
 import Foreign.Concurrent
+import System.IO.Unsafe (unsafePerformIO)
 
 import System.Win32.HCOM.COMCall
 import System.Win32.HCOM.GUID

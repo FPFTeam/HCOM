@@ -1,6 +1,6 @@
 -- This file is licensed under the New BSD License
 -- For 'instance Stackable String':
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 -- Ditto.
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 

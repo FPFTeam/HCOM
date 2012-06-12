@@ -24,8 +24,9 @@ import Control.Exception
 import Control.Applicative
 import Data.Char
 import Data.Typeable
-import Foreign
+import Foreign hiding (unsafePerformIO)
 import Text.Printf
+import System.IO.Unsafe (unsafePerformIO)
 
 import System.Win32.HCOM.RawFunctions
 import System.Win32.HCOM.GUID
