@@ -13,6 +13,8 @@ module System.Win32.HCOM.SafeArray
   COMStorable(..)
   -- SafeArrays hold COMStorable items.
 , SafeArray(..)
+, SABound
+, SAIndex
 , newSafeArray
 , newSafeArrayM
 , fromList
@@ -128,18 +130,20 @@ instance COMStorable UTCTime where
 
 type SAIndex = Int
 
--- (Lower bound, upper bound)
+-- | (Lower bound, upper bound)
 type SABound = (SAIndex, SAIndex)
 
 data SafeArray a = SafeArray
     {
-     -- A set of dimensional bounds, specified least-significant
-     -- first. In C terms, the bounds are specified in right-to-left
+     -- | A set of dimensional bounds, specified least-significant
+     -- first.
+     --
+     -- In C terms, the bounds are specified in right-to-left
      -- order. This is consistent with SafeArrayCreate and
      -- SafeArrayGetElement, but not with the ordering inside the
-     -- SAFEARRAY structure itself. Nice.
+     -- SAFEARRAY structure itself.
      saBounds :: [SABound],
-     -- The data, in a flattened format.
+     -- | The data, in a flattened format.
      saData :: [a]
     } deriving (Show, Eq, Ord)
 
@@ -147,7 +151,7 @@ data SafeArray a = SafeArray
 -- SafeArray accessor functions.
 --
 
--- Create a safe array from the provided bounds and function,
+-- | Create a safe array from the provided bounds and function,
 -- monadically. (Supplying a monad gives us plenty of flexibility).
 newSafeArrayM :: Monad m => [SABound] -> ([SAIndex] -> m a) -> m (SafeArray a)
 newSafeArrayM bounds f = do
@@ -158,20 +162,20 @@ newSafeArrayM bounds f = do
         genIndices ((lbound, ubound) : xs) =
             [(y:ys) | y <- [lbound..ubound], ys <- genIndices xs]
 
--- Now the non-monadic version.
+-- | Now the non-monadic version.
 newSafeArray :: [SABound] -> ([SAIndex] -> a) -> SafeArray a
 newSafeArray bounds f = runIdentity $ newSafeArrayM bounds (return . f)
 
--- A simple 1d SafeArray creator.
+-- | A simple 1d SafeArray creator.
 fromList :: [a] -> SafeArray a
 fromList elts = SafeArray [(0, length elts - 1)] elts
 
--- A conversion to a list.
+-- | A conversion to a list.
 toList :: SafeArray a -> [a]
 toList (SafeArray [_] elts) = elts
 toList _                    = throwHCOM "Can't convert a multi-dimensional Safe Array to a list."
 
--- A simple 2d SafeArray creator.
+-- | A simple 2d SafeArray creator.
 fromList2D :: [[a]] -> SafeArray a
 fromList2D elts =
     if not $ all (\x -> length x == length (head elts)) elts
@@ -180,7 +184,7 @@ fromList2D elts =
                     , (0, length elts        - 1)]
                     (concat elts)
 
--- Convert a 2d SafeArray to nested lists.
+-- | Convert a 2d SafeArray to nested lists.
 toList2D :: SafeArray a -> [[a]]
 toList2D (SafeArray [(l, u), _] elts) =
   let len = u - l + 1
@@ -189,7 +193,7 @@ toList2D (SafeArray [(l, u), _] elts) =
                       else Just $ splitAt len x) elts
 toList2D _ = throwHCOM "'toList2D' only works on 2D Safe Arrays!"
 
--- Get element from an arbitrarily-dimensioned safe array
+-- | Get element from an arbitrarily-dimensioned safe array
 (!) :: SafeArray a -> [SAIndex] -> a
 sa ! indices = saData sa !! offset where
     -- Fold relies on our indices being ordered least-sig to most-sig.

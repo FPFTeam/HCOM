@@ -55,10 +55,10 @@ import System.Win32.HCOM.ErrorBase
 -- Interfaces
 --
 
--- Our Interfaces are simply types which we use with COM pointers to
+-- | Our Interfaces are simply types which we use with COM pointers to
 -- create phantom types, representing the underlying interface exposed
 -- by the COM object.
-
+--
 -- We define a type class to represent things which are Interfaces.
 -- The type class allows us to access the IID associated with an
 -- interface (useful for CoCreate, QueryInterface, etc.)
@@ -119,7 +119,7 @@ newtype COMPtr a = CP (ForeignPtr ())
 comFinalizer :: LPUNKNOWN -> IO ()
 comFinalizer = void . rawRelease
 
--- A null COM pointer.
+-- | A null COM pointer.
 nullCOMPtr :: COMPtr a
 nullCOMPtr = unsafePerformIO (CP <$> newForeignPtr_ nullPtr)
 

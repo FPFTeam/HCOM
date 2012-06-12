@@ -6,19 +6,19 @@
 --
 
 module System.Win32.HCOM
-  -- COM types
-( GUID(..)
+( -- * COM types
+  GUID(..)
 , IID
 , CLSID
-  -- COM interfaces and pointers
+  -- * COM interfaces and pointers
 , Interface(..)
 , IUnknown
 , IDispatch
 , COMPtr()
 , nullCOMPtr
-  -- Variants
+  -- * Variants
 , Variant(..)
-  -- Variant conversion
+  -- * Variant conversion
 , ToVariant(..)
 , FromVariant(..)
 , vtArgIn
@@ -26,28 +26,30 @@ module System.Win32.HCOM
 , vtvtArgIn
 , vtArgInOut
 , vtArgOut
-  -- Safearrays
+  -- * Safearrays
 , SafeArray(..)
-, newSafeArray
+, SABound
+, SAIndex
 , newSafeArrayM
+, newSafeArray
 , fromList
 , toList
 , fromList2D
 , toList2D
 , (!)
-  -- COM functions
+  -- * COM functions
 , module System.Win32.HCOM.Functions
 , queryInterface
 , qi
 , qiChecked
-  -- COM call construction (used to implement interfaces)
+  -- * COM call construction (used to implement interfaces)
 , Stackable(..)
 , Stack
 , vcall
-  -- Error handling
+  -- * Error handling
 , module System.Win32.HCOM.ErrorBase
 , module System.Win32.HCOM.ErrorUtils
-  -- Helpers
+  -- * Helpers
 , (~>)
 ) where
 
@@ -64,6 +66,6 @@ import System.Win32.HCOM.Stack
 import System.Win32.HCOM.Variant
 import System.Win32.HCOM.VariantConversion
 
--- Like '->' in OO languages.
+-- | Like @->@ in OO languages.
 (~>) :: COMPtr a -> (COMPtr a -> b) -> b
 obj ~> call = call obj

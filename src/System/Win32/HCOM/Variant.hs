@@ -33,35 +33,43 @@ import System.Win32.HCOM.Tags
 -- First, let's define a Variant on the Haskell side as an algebraic
 -- datatype:
 
--- The tags here match up with what's supported by VARIANT according
+-- | The tags here match up with what's supported by VARIANT according
 -- to WTypes.h.
-
--- http://msdn.microsoft.com/en-us/library/ms221627.aspx is quite
--- useful, too.
-
+--
 -- We explicitly support both individual values, and safearrays of
 -- those values marked with the VT_ARRAY flag.
+--
+-- <http://msdn.microsoft.com/en-us/library/e305240e-9e11-4006-98cc-26f4932d2118(VS.85)> is quite useful, too.
+--
+-- The types we currently do not support are:
+--
+-- * Anything VT_BYREF (non-VT_ARRAY VT_VARIANT is /only/ allowed with
+--   VT_BYREF, and thus is not supported).
+--
+-- * VT_CY      - slightly obscure
+--
+-- * VT_RECORD  - not sure how to handle this
 
 data Variant = -- Non-array types.
-               VT_EMPTY                         -- Nothing
-             | VT_NULL                          -- SQL-style NULL
-             | VT_I2        Int16               -- 2 byte signed int
-             | VT_I4        Int32               -- 4 byte signed int
-             | VT_R4        Float               -- 4 byte real
-             | VT_R8        Double              -- 8 byte real
-             | VT_DATE      UTCTime             -- Date
-             | VT_BSTR      B.ByteString        -- String
-             | VT_DISPATCH  (COMPtr IDispatch)  -- IDispatch *
-             | VT_ERROR     HResult             -- SCODE
-             | VT_BOOL      Bool                -- -1 = True, 0 = False
-             | VT_UNKNOWN   (COMPtr IUnknown)   -- IUnknown *
-             | VT_I1        Int8                -- Signed char
-             | VT_UI1       Word8               -- Unsigned char
-             | VT_UI2       Word16              -- Unsigned short
-             | VT_UI4       Word32              -- Unsigned long
-             | VT_INT       Int                 -- Signed machine int
-             | VT_UINT      Word                -- Unsigned machine int
-             | VT_DECIMAL   Rational            -- High precesion decimals
+               VT_EMPTY                         -- ^ Nothing
+             | VT_NULL                          -- ^ SQL-style NULL
+             | VT_I2        Int16               -- ^ 2 byte signed int
+             | VT_I4        Int32               -- ^ 4 byte signed int
+             | VT_R4        Float               -- ^ 4 byte real
+             | VT_R8        Double              -- ^ 8 byte real
+             | VT_DATE      UTCTime             -- ^ Date
+             | VT_BSTR      B.ByteString        -- ^ String
+             | VT_DISPATCH  (COMPtr IDispatch)  -- ^ IDispatch *
+             | VT_ERROR     HResult             -- ^ SCODE
+             | VT_BOOL      Bool                -- ^ \-1 = True, 0 = False
+             | VT_UNKNOWN   (COMPtr IUnknown)   -- ^ IUnknown *
+             | VT_I1        Int8                -- ^ Signed char
+             | VT_UI1       Word8               -- ^ Unsigned char
+             | VT_UI2       Word16              -- ^ Unsigned short
+             | VT_UI4       Word32              -- ^ Unsigned long
+             | VT_INT       Int                 -- ^ Signed machine int
+             | VT_UINT      Word                -- ^ Unsigned machine int
+             | VT_DECIMAL   Rational            -- ^ High precesion decimals
                -- Array types.
              | VT_I2a       (SafeArray Int16)
              | VT_I4a       (SafeArray Int32)
@@ -81,13 +89,6 @@ data Variant = -- Non-array types.
              | VT_INTa      (SafeArray Int)
              | VT_UINTa     (SafeArray Word)
                deriving (Show, Eq, Ord)
-
--- The types we currently do not support are:
---
--- * Anything VT_BYREF (non-VT_ARRAY VT_VARIANT is /only/ allowed with
---   VT_BYREF, and thus is not supported).
--- * VT_CY      - slightly obscure, and I'm lazy
--- * VT_RECORD  - not sure how to handle this
 
 unsupportedTagError :: VARTYPE -> a
 unsupportedTagError tag =

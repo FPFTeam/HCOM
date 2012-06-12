@@ -29,7 +29,7 @@ import System.Win32.HCOM.Stack
 -- GUID data definitions and marshalling.
 --
 
--- We try to match the Windows representation as closely as possible.
+-- | We try to match the Windows representation as closely as possible.
 data GUID = GUID Word32
                  Word16 Word16 Word16
                  Word8 Word8 Word8 Word8 Word8 Word8

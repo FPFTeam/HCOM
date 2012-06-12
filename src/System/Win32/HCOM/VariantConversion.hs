@@ -32,7 +32,7 @@ import System.Win32.HCOM.Variant
 import System.Win32.HCOM.Stack
 
 ------------------------------------------------------------------------
--- Type class to simplify variant construction.
+-- | Type class to simplify variant construction.
 --
 
 class ToVariant a where
@@ -97,7 +97,7 @@ instance ToVariant [Int]                          where vt = VT_INTa      . from
 instance ToVariant [Word]                         where vt = VT_UINTa     . fromList
 
 ------------------------------------------------------------------------
--- Type class to simplify variant extraction.
+-- | Type class to simplify variant extraction.
 --
 
 class FromVariant a where
