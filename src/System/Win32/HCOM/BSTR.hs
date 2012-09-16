@@ -15,10 +15,11 @@ module System.Win32.HCOM.BSTR() where
 
 import Control.Applicative
 import Control.Monad.Trans
+import Control.Monad
 import qualified Data.ByteString.Char8    as B
 import qualified Data.ByteString.Internal as BI
 import Data.Char
-import Foreign
+import Foreign hiding (void)
 
 import System.Win32.HCOM.RawFunctions
 import System.Win32.HCOM.SafeArray

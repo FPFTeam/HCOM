@@ -31,9 +31,9 @@ module System.Win32.HCOM.COMPtr
 import Control.Applicative
 import Control.Category hiding ((.), id)
 import Control.Exception
-import Control.Monad hiding (void)
+import Control.Monad
 import Control.Monad.Trans
-import Foreign hiding (newForeignPtr, unsafePerformIO)
+import Foreign hiding (newForeignPtr, unsafePerformIO, void)
 import Foreign.Concurrent
 import System.IO.Unsafe (unsafePerformIO)
 
