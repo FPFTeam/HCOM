@@ -1,5 +1,5 @@
 -- This file is licensed under the New BSD License
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, CPP #-}
 
 --
 -- ErrorBase.hs:
@@ -19,7 +19,9 @@ module System.Win32.HCOM.ErrorBase
 , inContext
 ) where
 
+#if ! MIN_VERSION_base(4,6,0)
 import Prelude hiding (catch)
+#endif
 import Control.Exception
 import Control.Applicative
 import Data.Char
