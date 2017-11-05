@@ -13,7 +13,6 @@
 -- Only export instances.
 module System.Win32.HCOM.BSTR() where
 
-import Control.Applicative
 import Control.Monad.Trans
 import Control.Monad
 import qualified Data.ByteString.Char8    as B

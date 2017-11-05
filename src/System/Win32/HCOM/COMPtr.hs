@@ -28,12 +28,11 @@ module System.Win32.HCOM.COMPtr
 , qiChecked
 ) where
 
-import Control.Applicative
 import Control.Category hiding ((.), id)
 import Control.Exception
 import Control.Monad
 import Control.Monad.Trans
-import Foreign hiding (newForeignPtr, unsafePerformIO, void)
+import Foreign hiding (newForeignPtr, void)
 import Foreign.Concurrent
 import System.IO.Unsafe (unsafePerformIO)
 

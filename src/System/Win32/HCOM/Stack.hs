@@ -24,7 +24,6 @@ module System.Win32.HCOM.Stack
 , withForeignPtr'
 ) where
 
-import Control.Applicative
 import Control.Arrow
 import Control.Exception
 import Control.Monad.Reader
