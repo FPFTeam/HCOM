@@ -25,7 +25,6 @@ Library
     build-depends: base >4, mtl >1, time >1, bytestring >0.9
     pkgconfig-depends:
     if os(windows)
-        c-sources: src/System/Win32/HCOM/Thunk.s
         extra-libraries: ole32 oleaut32
     hs-source-dirs: src
     other-modules: System.Win32.HCOM.BSTR
@@ -43,4 +42,4 @@ Library
                    System.Win32.HCOM.SafeArray
                    System.Win32.HCOM.Tags
                    System.Win32.HCOM.Extras
-    ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind -Werror
+    ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind

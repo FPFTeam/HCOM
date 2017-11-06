@@ -23,10 +23,9 @@ module System.Win32.HCOM.ErrorBase
 import Prelude hiding (catch)
 #endif
 import Control.Exception
-import Control.Applicative
 import Data.Char
 import Data.Typeable
-import Foreign hiding (unsafePerformIO)
+import Foreign
 import Text.Printf
 import System.IO.Unsafe (unsafePerformIO)
 

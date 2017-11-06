@@ -15,10 +15,10 @@ module System.Win32.HCOM.COMCall
 , rawVCall      -- Invoke a COM function.
 ) where
 
-import Control.Applicative
 import Control.Category hiding ((.), id)
-import Control.Monad
+import Data.Void
 import Foreign
+import Unsafe.Coerce
 
 import System.Win32.HCOM.Flatten
 import System.Win32.HCOM.RawFunctions(HRESULT)
@@ -51,91 +51,88 @@ import System.Win32.HCOM.Stack
 -- onto the stack. We would then allocate an area, dump the list into
 -- it, and call that function instead.
 
-type F0  = IO Word32
-type F1  = Word32 -> F0
-type F2  = Word32 -> F1
-type F3  = Word32 -> F2
-type F4  = Word32 -> F3
-type F5  = Word32 -> F4
-type F6  = Word32 -> F5
-type F7  = Word32 -> F6
-type F8  = Word32 -> F7
-type F9  = Word32 -> F8
-type F10 = Word32 -> F9
-type F11 = Word32 -> F10
-type F12 = Word32 -> F11
-type F13 = Word32 -> F12
-type F14 = Word32 -> F13
-type F15 = Word32 -> F14
-type F16 = Word32 -> F15
-type F17 = Word32 -> F16
-type F18 = Word32 -> F17
-type F19 = Word32 -> F18
-type F20 = Word32 -> F19
-type F21 = Word32 -> F20
-type F22 = Word32 -> F21
-type F23 = Word32 -> F22
-type F24 = Word32 -> F23
-type F25 = Word32 -> F24
-type F26 = Word32 -> F25
+type F0  = IO  Word
+type F1  = Ptr Void -> F0
+type F2  = Ptr Void -> F1
+type F3  = Ptr Void -> F2
+type F4  = Ptr Void -> F3
+type F5  = Ptr Void -> F4
+type F6  = Ptr Void -> F5
+type F7  = Ptr Void -> F6
+type F8  = Ptr Void -> F7
+type F9  = Ptr Void -> F8
+type F10 = Ptr Void -> F9
+type F11 = Ptr Void -> F10
+type F12 = Ptr Void -> F11
+type F13 = Ptr Void -> F12
+type F14 = Ptr Void -> F13
+type F15 = Ptr Void -> F14
+type F16 = Ptr Void -> F15
+type F17 = Ptr Void -> F16
+type F18 = Ptr Void -> F17
+type F19 = Ptr Void -> F18
+type F20 = Ptr Void -> F19
+type F21 = Ptr Void -> F20
+type F22 = Ptr Void -> F21
+type F23 = Ptr Void -> F22
+type F24 = Ptr Void -> F23
+type F25 = Ptr Void -> F24
+type F26 = Ptr Void -> F25
 
-foreign import stdcall "thunk" thunk0  :: F0
-foreign import stdcall "thunk" thunk1  :: F1
-foreign import stdcall "thunk" thunk2  :: F2
-foreign import stdcall "thunk" thunk3  :: F3
-foreign import stdcall "thunk" thunk4  :: F4
-foreign import stdcall "thunk" thunk5  :: F5
-foreign import stdcall "thunk" thunk6  :: F6
-foreign import stdcall "thunk" thunk7  :: F7
-foreign import stdcall "thunk" thunk8  :: F8
-foreign import stdcall "thunk" thunk9  :: F9
-foreign import stdcall "thunk" thunk10 :: F10
-foreign import stdcall "thunk" thunk11 :: F11
-foreign import stdcall "thunk" thunk12 :: F12
-foreign import stdcall "thunk" thunk13 :: F13
-foreign import stdcall "thunk" thunk14 :: F14
-foreign import stdcall "thunk" thunk15 :: F15
-foreign import stdcall "thunk" thunk16 :: F16
-foreign import stdcall "thunk" thunk17 :: F17
-foreign import stdcall "thunk" thunk18 :: F18
-foreign import stdcall "thunk" thunk19 :: F19
-foreign import stdcall "thunk" thunk20 :: F20
-foreign import stdcall "thunk" thunk21 :: F21
-foreign import stdcall "thunk" thunk22 :: F22
-foreign import stdcall "thunk" thunk23 :: F23
-foreign import stdcall "thunk" thunk24 :: F24
-foreign import stdcall "thunk" thunk25 :: F25
-foreign import stdcall "thunk" thunk26 :: F26
+foreign import stdcall "dynamic" thunk1  :: FunPtr F1  -> F1
+foreign import stdcall "dynamic" thunk2  :: FunPtr F2  -> F2
+foreign import stdcall "dynamic" thunk3  :: FunPtr F3  -> F3
+foreign import stdcall "dynamic" thunk4  :: FunPtr F4  -> F4
+foreign import stdcall "dynamic" thunk5  :: FunPtr F5  -> F5
+foreign import stdcall "dynamic" thunk6  :: FunPtr F6  -> F6
+foreign import stdcall "dynamic" thunk7  :: FunPtr F7  -> F7
+foreign import stdcall "dynamic" thunk8  :: FunPtr F8  -> F8
+foreign import stdcall "dynamic" thunk9  :: FunPtr F9  -> F9
+foreign import stdcall "dynamic" thunk10 :: FunPtr F10 -> F10
+foreign import stdcall "dynamic" thunk11 :: FunPtr F11 -> F11
+foreign import stdcall "dynamic" thunk12 :: FunPtr F12 -> F12
+foreign import stdcall "dynamic" thunk13 :: FunPtr F13 -> F13
+foreign import stdcall "dynamic" thunk14 :: FunPtr F14 -> F14
+foreign import stdcall "dynamic" thunk15 :: FunPtr F15 -> F15
+foreign import stdcall "dynamic" thunk16 :: FunPtr F16 -> F16
+foreign import stdcall "dynamic" thunk17 :: FunPtr F17 -> F17
+foreign import stdcall "dynamic" thunk18 :: FunPtr F18 -> F18
+foreign import stdcall "dynamic" thunk19 :: FunPtr F19 -> F19
+foreign import stdcall "dynamic" thunk20 :: FunPtr F20 -> F20
+foreign import stdcall "dynamic" thunk21 :: FunPtr F21 -> F21
+foreign import stdcall "dynamic" thunk22 :: FunPtr F22 -> F22
+foreign import stdcall "dynamic" thunk23 :: FunPtr F23 -> F23
+foreign import stdcall "dynamic" thunk24 :: FunPtr F24 -> F24
+foreign import stdcall "dynamic" thunk25 :: FunPtr F25 -> F25
+foreign import stdcall "dynamic" thunk26 :: FunPtr F26 -> F26
 
-callThunk :: [Word32] -> IO Word32
-
-callThunk []                                                    = thunk0
-callThunk [a]                                                   = thunk1  a
-callThunk [a,b]                                                 = thunk2  a b
-callThunk [a,b,c]                                               = thunk3  a b c
-callThunk [a,b,c,d]                                             = thunk4  a b c d
-callThunk [a,b,c,d,e]                                           = thunk5  a b c d e
-callThunk [a,b,c,d,e,f]                                         = thunk6  a b c d e f
-callThunk [a,b,c,d,e,f,g]                                       = thunk7  a b c d e f g
-callThunk [a,b,c,d,e,f,g,h]                                     = thunk8  a b c d e f g h
-callThunk [a,b,c,d,e,f,g,h,i]                                   = thunk9  a b c d e f g h i
-callThunk [a,b,c,d,e,f,g,h,i,j]                                 = thunk10 a b c d e f g h i j
-callThunk [a,b,c,d,e,f,g,h,i,j,k]                               = thunk11 a b c d e f g h i j k
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l]                             = thunk12 a b c d e f g h i j k l
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m]                           = thunk13 a b c d e f g h i j k l m
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n]                         = thunk14 a b c d e f g h i j k l m n
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]                       = thunk15 a b c d e f g h i j k l m n o
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p]                     = thunk16 a b c d e f g h i j k l m n o p
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q]                   = thunk17 a b c d e f g h i j k l m n o p q
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r]                 = thunk18 a b c d e f g h i j k l m n o p q r
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s]               = thunk19 a b c d e f g h i j k l m n o p q r s
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t]             = thunk20 a b c d e f g h i j k l m n o p q r s t
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u]           = thunk21 a b c d e f g h i j k l m n o p q r s t u
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v]         = thunk22 a b c d e f g h i j k l m n o p q r s t u v
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w]       = thunk23 a b c d e f g h i j k l m n o p q r s t u v w
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x]     = thunk24 a b c d e f g h i j k l m n o p q r s t u v w x
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y]   = thunk25 a b c d e f g h i j k l m n o p q r s t u v w x y
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z] = thunk26 a b c d e f g h i j k l m n o p q r s t u v w x y z
+callThunk :: [Ptr Void] -> IO Word
+callThunk [funptr, a]                                                   = thunk1  (castPtrToFunPtr $ castPtr funptr) a
+callThunk [funptr, a,b]                                                 = thunk2  (castPtrToFunPtr $ castPtr funptr) a b
+callThunk [funptr, a,b,c]                                               = thunk3  (castPtrToFunPtr $ castPtr funptr) a b c
+callThunk [funptr, a,b,c,d]                                             = thunk4  (castPtrToFunPtr $ castPtr funptr) a b c d
+callThunk [funptr, a,b,c,d,e]                                           = thunk5  (castPtrToFunPtr $ castPtr funptr) a b c d e
+callThunk [funptr, a,b,c,d,e,f]                                         = thunk6  (castPtrToFunPtr $ castPtr funptr) a b c d e f
+callThunk [funptr, a,b,c,d,e,f,g]                                       = thunk7  (castPtrToFunPtr $ castPtr funptr) a b c d e f g
+callThunk [funptr, a,b,c,d,e,f,g,h]                                     = thunk8  (castPtrToFunPtr $ castPtr funptr) a b c d e f g h
+callThunk [funptr, a,b,c,d,e,f,g,h,i]                                   = thunk9  (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j]                                 = thunk10 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k]                               = thunk11 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l]                             = thunk12 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m]                           = thunk13 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n]                         = thunk14 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]                       = thunk15 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p]                     = thunk16 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q]                   = thunk17 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r]                 = thunk18 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s]               = thunk19 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t]             = thunk20 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u]           = thunk21 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v]         = thunk22 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u v
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w]       = thunk23 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u v w
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x]     = thunk24 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u v w x
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y]   = thunk25 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u v w x y
+callThunk [funptr, a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z] = thunk26 (castPtrToFunPtr $ castPtr funptr) a b c d e f g h i j k l m n o p q r s t u v w x y z
 callThunk _ = error "Internal error in vcall: Too many arguments."
 
 ------------------------------------------------------------------------
@@ -154,11 +151,15 @@ rawVCall obj idx args = do
   vtbl <- peek (castPtr obj :: Ptr VTblPtr)
   -- Index into it to get the appropriate function.
   fn   <- peekElemOff vtbl idx
-  -- Cast our parameter list into a set of Word32s we can construct a
+  -- Cast our parameter list into a set of Voids we can construct a
   -- stack from, and then invoke the function.
   let fullArgs = argIn fn >>> argIn obj >>> args
   -- Our thunk should be wrapped up to put the HResult into a
   -- pseudo-list format we can then flatten.
-      thunk = liftM ((,) ()) . callThunk
+      thunk = fmap ((,) ()) . fmap fromIntegral . callThunk . map reinterpret_cast
   -- Finally, do the invocation and flatten the result into a plain tuple.
   flatten <$> (thunk #< fullArgs)
+
+-- TODO replace with github.com/nh2/reinterpret-cast
+reinterpret_cast :: Word -> Ptr Void
+reinterpret_cast = unsafeCoerce

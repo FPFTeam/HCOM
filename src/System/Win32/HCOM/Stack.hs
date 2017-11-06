@@ -1,3 +1,4 @@
+{-# OPTIONS -Wno-overflowed-literals #-}
 -- This file is licensed under the New BSD License
 --
 -- Stack.hs:
@@ -36,8 +37,8 @@ import Foreign
 
 -- When we do a COM invocation, we need to build up an actual set of
 -- assembly-level concrete values on the stack. Since everything on
--- the COM stack is at least Word32-aligned, our core stack is of type
--- [Word32].
+-- the COM stack is at least Word-aligned, our core stack is of type
+-- [Word].
 --
 -- We'll do all our stack-building inside the I/O monad, to allow us
 -- to manipulate low-level chunks of memory when serialising
@@ -48,7 +49,7 @@ import Foreign
 -- We want to construct a stack, so let's build up the stack with a
 -- WriterT monad transformer to hold the built stack:
 --
--- type Stack = WriterT [Word32] IO ()
+-- type Stack = WriterT [Word] IO ()
 --
 -- Attempt #2:
 --
@@ -57,7 +58,7 @@ import Foreign
 -- given another operation Y, performs the set-up of X first, runs Y,
 -- and then the performs the teardown of X:
 --
--- type Stack = WriterT [Word32] IO a -> WriterT [Word32] IO a
+-- type Stack = WriterT [Word] IO a -> WriterT [Word] IO a
 --
 -- Attempt #3:
 --
@@ -66,7 +67,7 @@ import Foreign
 -- WriterT, to make the stack available to the COM call, which is the
 -- most deeply-nested operation!
 --
--- type Stack = ReaderT [Word32] IO a -> ReaderT [Word32] IO a
+-- type Stack = ReaderT [Word] IO a -> ReaderT [Word] IO a
 --
 -- Attempt #4:
 --
@@ -74,10 +75,10 @@ import Foreign
 -- make our Stack take a value, and instead of just pass it on, we'll
 -- modify it.
 --
--- type Stack a b = ReaderT [Word32] IO a -> ReaderT [Word32] IO b
+-- type Stack a b = ReaderT [Word] IO a -> ReaderT [Word] IO b
 --
 
-type StackM = ReaderT [Word32] IO
+type StackM = ReaderT [Word] IO
 
 type Stack a b = StackM a -> StackM b
 
@@ -99,13 +100,13 @@ class Stackable a where
 
 -- Evaluate a stack.
 infix 0 #<
-(#<) :: ([Word32] -> IO a) -> Stack a b -> IO b
+(#<) :: ([Word] -> IO a) -> Stack a b -> IO b
 fn #< stackOp =
     let innerOp = ask >>= (lift . fn)
      in runReaderT (stackOp innerOp) []
 
 -- Put stuff on a stack, then execute the next thing.
-pushStack :: [Word32] -> StackM a -> StackM a
+pushStack :: [Word] -> StackM a -> StackM a
 pushStack xs = local (xs ++)
 
 ------------------------------------------------------------------------
@@ -131,7 +132,7 @@ allocaBytes' :: Int -> (Ptr a -> StackM b) -> StackM b
 allocaBytes' = liftNest . allocaBytes
 
 bracket' :: IO a -> (a -> IO b) -> (a -> StackM c) -> StackM c
-bracket' a b c = liftNest (\c' -> bracket a b c') c
+bracket' a b = liftNest (\c' -> bracket a b c')
 
 bracket_' :: IO a -> IO b -> StackM c -> StackM c
 bracket_' a b c = liftNest (\c' -> bracket_ a b (c' ())) (const c)
@@ -148,14 +149,14 @@ withForeignPtr' = liftNest . withForeignPtr
 
 -- The nice thing about these types are that they are:
 -- a) Storable
--- b) Castable to Word32.
+-- b) Castable to Word.
 -- This makes it easy to write boilerplate for Stackable.
 
 -- NB: Our serialisation using 'fromIntegral' is rather dodgy, but
 -- works ok for little-endian systems.
 
 ai :: Integral a => a -> StackM b -> StackM b
-ai x f = pushStack [fromIntegral x] f
+ai x = pushStack [fromIntegral x]
 
 aibr :: (Stackable a, Storable a) => a -> StackM b -> StackM b
 aibr x f = with' x $ \ptr -> argIn ptr f
@@ -172,9 +173,10 @@ ao f = alloca' $ \ptr -> do
          out <- lift $ peek ptr
          return (res, out)
 
-instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Word   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int32    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word16   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int16    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word8    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int8     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
@@ -187,7 +189,7 @@ instance Stackable Int8     where argIn = ai; argInByRef = aibr; argInOut = aio;
 -- it's polite to initialise the out 'target' with a null pointer.
 
 instance Stackable (Ptr a)  where
-    argIn x    = ai (fromIntegral $ x `minusPtr` nullPtr :: Word32)
+    argIn x    = ai (fromIntegral $ x `minusPtr` nullPtr :: Word)
     argInByRef = aibr
     argInOut   = aio
     argOut     = aio nullPtr
@@ -196,7 +198,7 @@ instance Stackable (Ptr a)  where
 -- Marshalling of floating point types.
 --
 
-floatToRep :: Float -> IO [Word32]
+floatToRep :: Float -> IO [Word]
 floatToRep f = with f $ \p -> do
     let wp = castPtr p
     rep <- peek wp
@@ -208,7 +210,7 @@ instance Stackable Float  where
     argInOut   = aio
     argOut     = ao
 
-doubleToRep :: Double -> IO [Word32]
+doubleToRep :: Double -> IO [Word]
 doubleToRep f = with f $ \p -> do
     let wp = castPtr p
     lo <- peek wp

@@ -24,7 +24,7 @@ module System.Win32.HCOM.SafeArray
 , (!)
 ) where
 
-import Control.Applicative
+import Control.Monad
 import Control.Monad.Identity
 import Control.Monad.Trans
 import Data.Time
@@ -32,6 +32,7 @@ import Data.List
 import Foreign
 
 import System.Win32.HCOM.ErrorBase
+import {-# SOURCE #-} System.Win32.HCOM.ErrorUtils
 import System.Win32.HCOM.RawFunctions
 import System.Win32.HCOM.Stack
 import System.Win32.HCOM.Tags
@@ -160,7 +161,7 @@ newSafeArrayM bounds f = do
       where
         genIndices [] = [[]]
         genIndices ((lbound, ubound) : xs) =
-            [(y:ys) | y <- [lbound..ubound], ys <- genIndices xs]
+            [y:ys | y <- [lbound..ubound], ys <- genIndices xs]
 
 -- | Now the non-monadic version.
 newSafeArray :: [SABound] -> ([SAIndex] -> a) -> SafeArray a
@@ -214,17 +215,23 @@ sa ! indices = saData sa !! offset where
 -- SAFEARRAY field accessors.
 --
 
-saGetDims :: Ptr SAFEARRAY -> IO Word16
-saGetDims sa = peekByteOff sa 0
+saGetEltSize :: Ptr SAFEARRAY -> IO Word
+saGetEltSize = rawSafeArrayGetElemSize
 
-saGetEltSize :: Ptr SAFEARRAY -> IO Word32
-saGetEltSize sa = peekByteOff sa 4
+saWithData :: Ptr SAFEARRAY -> (Ptr a -> IO b) -> IO b
+saWithData sa cont = do
+  p <- alloca(\p -> rawSafeArrayAccessData sa p >>= checkHRInner >> peek p)
+  res <- cont p
+  rawSafeArrayUnaccessData sa >>= checkHRInner
+  return res
 
-saGetData :: Ptr SAFEARRAY -> IO (Ptr a)
-saGetData sa = peekByteOff sa 12
-
-saGetBounds :: Ptr SAFEARRAY -> Ptr Word32
-saGetBounds sa = castPtr $ sa `plusPtr` 16
+saGetBounds :: Ptr SAFEARRAY -> IO [SABound]
+saGetBounds sa = do
+  d <- rawSafeArrayGetDim sa
+  forM [1 .. d] $ \i -> do
+    l <- alloca $ \p -> rawSafeArrayGetLBound sa i p >>= checkHRInner >> peek p
+    u <- alloca $ \p -> rawSafeArrayGetUBound sa i p >>= checkHRInner >> peek p
+    return (fromIntegral l, fromIntegral u)
 
 numElts :: [SABound] -> Int
 numElts sa = product $ map (\(l, u) ->  u - l + 1) sa
@@ -247,12 +254,13 @@ marshalSafeArray sa = do
        throwHCOM "Trying to marshal bad-sized SafeArray."
 
   -- Allocate the bounds (each bound is #elts and lower bound - 2
+
   -- 32-bit words).
   allocaArray (2 * length (saBounds sa)) $ \boundsPtr -> do
       -- Fill the bounds in.
       let boundsList = concatMap (\(l, u) ->
                                       [fromIntegral $ u - l + 1,
-                                       fromIntegral $ l])
+                                       fromIntegral l])
                                  (saBounds sa)
       pokeArray boundsPtr boundsList
 
@@ -262,74 +270,65 @@ marshalSafeArray sa = do
                                   boundsPtr
 
       -- Get start of data, and size of elements in bytes.
-      pvData  <- saGetData saPtr
-      eltSize <- fromIntegral <$> saGetEltSize saPtr
+      saWithData saPtr $ \pvData -> do
+        eltSize <- fromIntegral <$> saGetEltSize saPtr
 
-      -- And write!
-      let eltWriter i d = store (pvData `plusPtr` (i * eltSize)) d
-      zipWithM_ eltWriter [0..] (saData sa)
+        -- And write!
+        let eltWriter i = store (pvData `plusPtr` (i * eltSize))
+        zipWithM_ eltWriter [0..] (saData sa)
 
       return saPtr
 
 unmarshalSafeArray :: COMStorable a => Ptr SAFEARRAY -> IO (SafeArray a)
 unmarshalSafeArray saPtr = do
   -- Extract the bounds.
-  cDims <- fromIntegral <$> saGetDims saPtr
-  boundsList <- peekArray (cDims * 2) $ saGetBounds saPtr
-  let deBound (count : lb : rest) =
-          (fromIntegral lb, fromIntegral $ lb + count - 1) : deBound rest
-      deBound [_] = []
-      deBound []  = []
-  -- Nuttily, the SAFEARRAY structure stores the bounds in the reverse
-  -- order compared to those used by SafeArrayCreate!
-  let bounds = reverse $ deBound boundsList
+  bounds <- saGetBounds saPtr
 
   -- Extract contents
-  pvData <- saGetData saPtr
-  let eltCount = numElts bounds
-  eltSize <- fromIntegral <$> saGetEltSize saPtr
-  let eltReader i = fetch $ pvData `plusPtr` (i * eltSize)
-  vals <- mapM eltReader [0..eltCount-1]
+  vals <- saWithData saPtr $ \pvData -> do
+      let eltCount = numElts bounds
+      eltSize <- fromIntegral <$> saGetEltSize saPtr
+      let eltReader i = fetch $ pvData `plusPtr` (i * eltSize)
+      mapM eltReader [0..eltCount-1]
 
-  return $ SafeArray { saBounds = bounds
-                     , saData   = vals
-                     }
+  return  SafeArray { saBounds = bounds
+                    , saData   = vals
+                    }
 
 freeSafeArray :: Ptr SAFEARRAY -> IO ()
-freeSafeArray ptr = do
-  rawSafeArrayDestroy ptr
+freeSafeArray = rawSafeArrayDestroy
 
 ------------------------------------------------------------------------
 -- Instance of Stackable.
 --
 
 instance COMStorable a => Stackable (SafeArray a) where
-    argIn x f = do
+    argIn x f =
       bracket' (marshalSafeArray x)
-               (freeSafeArray)
-               (\ptr -> argIn ptr f)
+               freeSafeArray
+               (`argIn` f)
 
-    argInByRef x f = do
+    argInByRef x f =
       bracket' (marshalSafeArray x)
-               (freeSafeArray)
-               (\ptr -> argInByRef ptr f)
+             freeSafeArray
+             (`argInByRef` f)
 
-    argInOut x f = do
-      alloca' $ \ptr -> do
-        bracket_' (marshalSafeArray x >>= poke ptr)
-                  (freeSafeArray      =<< peek ptr)
-                  (do
-                     res <- argIn ptr f
-                     sa  <- lift $ unmarshalSafeArray =<< peek ptr
-                     return (res, sa))
+    argInOut x f =
+      alloca' $ \ptr ->
+      bracket_' (marshalSafeArray x >>= poke ptr)
+              (freeSafeArray      =<< peek ptr)
+              (do
+                 res <- argIn ptr f
+                 sa  <- lift $ unmarshalSafeArray =<< peek ptr
+                 return (res, sa))
 
-    argOut f = do
-      with' nullPtr $ \ptr -> do
-        finally' (do
-                    res <- argIn ptr f
-                    sa  <- lift $ unmarshalSafeArray =<< peek ptr
-                    return (res, sa))
-                 (freeSafeArray =<< peek ptr)
+    argOut f =
+      with' nullPtr $ \ptr ->
+      finally' (do
+                res <- argIn ptr f
+                sa  <- lift $ unmarshalSafeArray =<< peek ptr
+                return (res, sa))
+             (freeSafeArray =<< peek ptr)
 
 ------------------------------------------------------------------------
 -- Safearrays are themselves storable, so we can place them inside

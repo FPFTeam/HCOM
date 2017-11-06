@@ -18,7 +18,6 @@ module System.Win32.HCOM.VariantConversion
 ) where
 
 import Control.Arrow
-import Control.Monad
 import qualified Data.ByteString.Char8 as B
 import Data.Time
 import Data.Ratio
@@ -41,6 +40,7 @@ class ToVariant a where
 instance ToVariant Variant                        where vt = id
 instance ToVariant Int16                          where vt = VT_I2
 instance ToVariant Int32                          where vt = VT_I4
+instance ToVariant Int64                          where vt = VT_I8
 instance ToVariant Float                          where vt = VT_R4
 instance ToVariant Double                         where vt = VT_R8
 instance ToVariant UTCTime                        where vt = VT_DATE
@@ -54,10 +54,12 @@ instance ToVariant Int8                           where vt = VT_I1
 instance ToVariant Word8                          where vt = VT_UI1
 instance ToVariant Word16                         where vt = VT_UI2
 instance ToVariant Word32                         where vt = VT_UI4
+instance ToVariant Word64                         where vt = VT_UI8
 instance ToVariant Int                            where vt = VT_INT
 instance ToVariant Word                           where vt = VT_UINT
 instance ToVariant (SafeArray Int16)              where vt = VT_I2a
 instance ToVariant (SafeArray Int32)              where vt = VT_I4a
+instance ToVariant (SafeArray Int64)              where vt = VT_I8a
 instance ToVariant (SafeArray Float)              where vt = VT_R4a
 instance ToVariant (SafeArray Double)             where vt = VT_R8a
 instance ToVariant (SafeArray UTCTime)            where vt = VT_DATEa
@@ -71,6 +73,7 @@ instance ToVariant (SafeArray Int8)               where vt = VT_I1a
 instance ToVariant (SafeArray Word8)              where vt = VT_UI1a
 instance ToVariant (SafeArray Word16)             where vt = VT_UI2a
 instance ToVariant (SafeArray Word32)             where vt = VT_UI4a
+instance ToVariant (SafeArray Word64)             where vt = VT_UI8a
 instance ToVariant (SafeArray Int)                where vt = VT_INTa
 instance ToVariant (SafeArray Word)               where vt = VT_UINTa
 
@@ -79,6 +82,7 @@ instance ToVariant (SafeArray Word)               where vt = VT_UINTa
 -- nested lists or raw characters.
 instance ToVariant [Int16]                        where vt = VT_I2a       . fromList
 instance ToVariant [Int32]                        where vt = VT_I4a       . fromList
+instance ToVariant [Int64]                        where vt = VT_I8a       . fromList
 instance ToVariant [Float]                        where vt = VT_R4a       . fromList
 instance ToVariant [Double]                       where vt = VT_R8a       . fromList
 instance ToVariant [UTCTime]                      where vt = VT_DATEa     . fromList
@@ -93,6 +97,7 @@ instance ToVariant [Int8]                         where vt = VT_I1a       . from
 instance ToVariant [Word8]                        where vt = VT_UI1a      . fromList
 instance ToVariant [Word16]                       where vt = VT_UI2a      . fromList
 instance ToVariant [Word32]                       where vt = VT_UI4a      . fromList
+instance ToVariant [Word64]                       where vt = VT_UI8a      . fromList
 instance ToVariant [Int]                          where vt = VT_INTa      . fromList
 instance ToVariant [Word]                         where vt = VT_UINTa     . fromList
 
@@ -107,6 +112,7 @@ class FromVariant a where
 instance FromVariant Variant                        where unVT = id
 instance FromVariant Int16                          where unVT (VT_I2        x) =              x; unVT _ = unVTErr
 instance FromVariant Int32                          where unVT (VT_I4        x) =              x; unVT _ = unVTErr
+instance FromVariant Int64                          where unVT (VT_I8        x) =              x; unVT _ = unVTErr
 instance FromVariant Float                          where unVT (VT_R4        x) =              x;
                                                           unVT (VT_DECIMAL   x) = fromRational x; unVT _ = unVTErr
 instance FromVariant Double                         where unVT (VT_R8        x) =              x;
@@ -123,31 +129,38 @@ instance FromVariant Int8                           where unVT (VT_I1        x) 
 instance FromVariant Word8                          where unVT (VT_UI1       x) =              x; unVT _ = unVTErr
 instance FromVariant Word16                         where unVT (VT_UI2       x) =              x; unVT _ = unVTErr
 instance FromVariant Word32                         where unVT (VT_UI4       x) =              x; unVT _ = unVTErr
+instance FromVariant Word64                         where unVT (VT_UI8       x) =              x; unVT _ = unVTErr
 instance FromVariant Int                            where unVT (VT_INT       x) =              x;
                                                           unVT (VT_I2        x) = fromIntegral x;
                                                           unVT (VT_I4        x) = fromIntegral x;
-                                                          unVT (VT_I1        x) = fromIntegral x;
-                                                          unVT (VT_UI1       x) = fromIntegral x;
-                                                          unVT (VT_UI2       x) = fromIntegral x;
-                                                          unVT (VT_DECIMAL   x) | denominator x == 1 = fromIntegral . numerator $ x;
-                                                          unVT _ = unVTErr
-instance FromVariant Word                           where unVT (VT_UINT      x) = x
-                                                          unVT (VT_UI1       x) = fromIntegral x;
-                                                          unVT (VT_UI2       x) = fromIntegral x;
-                                                          unVT (VT_UI4       x) = fromIntegral x; unVT _ = unVTErr
-instance FromVariant Integer                        where unVT (VT_INT       x) = fromIntegral x;
-                                                          unVT (VT_I2        x) = fromIntegral x;
-                                                          unVT (VT_I4        x) = fromIntegral x;
+                                                          unVT (VT_I8        x) = fromIntegral x;
                                                           unVT (VT_I1        x) = fromIntegral x;
                                                           unVT (VT_UI1       x) = fromIntegral x;
                                                           unVT (VT_UI2       x) = fromIntegral x;
                                                           unVT (VT_UI4       x) = fromIntegral x;
                                                           unVT (VT_DECIMAL   x) | denominator x == 1 = fromIntegral . numerator $ x;
                                                           unVT _ = unVTErr
+instance FromVariant Word                           where unVT (VT_UINT      x) = x
+                                                          unVT (VT_UI1       x) = fromIntegral x;
+                                                          unVT (VT_UI2       x) = fromIntegral x;
+                                                          unVT (VT_UI4       x) = fromIntegral x;
+                                                          unVT (VT_UI8       x) = fromIntegral x; unVT _ = unVTErr
+instance FromVariant Integer                        where unVT (VT_INT       x) = fromIntegral x;
+                                                          unVT (VT_I2        x) = fromIntegral x;
+                                                          unVT (VT_I4        x) = fromIntegral x;
+                                                          unVT (VT_I8        x) = fromIntegral x;
+                                                          unVT (VT_I1        x) = fromIntegral x;
+                                                          unVT (VT_UI1       x) = fromIntegral x;
+                                                          unVT (VT_UI2       x) = fromIntegral x;
+                                                          unVT (VT_UI4       x) = fromIntegral x;
+                                                          unVT (VT_UI8       x) = fromIntegral x;
+                                                          unVT (VT_DECIMAL   x) | denominator x == 1 = fromIntegral . numerator $ x;
+                                                          unVT _ = unVTErr
 
 -- Extract simple safearrays.
 instance FromVariant (SafeArray Int16)              where unVT (VT_I2a       x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Int32)              where unVT (VT_I4a       x) = x; unVT _ = unVTErr
+instance FromVariant (SafeArray Int64)              where unVT (VT_I8a       x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Float)              where unVT (VT_R4a       x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Double)             where unVT (VT_R8a       x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray UTCTime)            where unVT (VT_DATEa     x) = x; unVT _ = unVTErr
@@ -161,12 +174,14 @@ instance FromVariant (SafeArray Int8)               where unVT (VT_I1a       x) 
 instance FromVariant (SafeArray Word8)              where unVT (VT_UI1a      x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Word16)             where unVT (VT_UI2a      x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Word32)             where unVT (VT_UI4a      x) = x; unVT _ = unVTErr
+instance FromVariant (SafeArray Word64)             where unVT (VT_UI8a      x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Int)                where unVT (VT_INTa      x) = x; unVT _ = unVTErr
 instance FromVariant (SafeArray Word)               where unVT (VT_UINTa     x) = x; unVT _ = unVTErr
 
 -- Extract lists of values.
 instance FromVariant [Int16]                        where unVT (VT_I2a       x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Int32]                        where unVT (VT_I4a       x) = toList                      x; unVT x = unVTVa x
+instance FromVariant [Int64]                        where unVT (VT_I8a       x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Float]                        where unVT (VT_R4a       x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Double]                       where unVT (VT_R8a       x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [UTCTime]                      where unVT (VT_DATEa     x) = toList                      x; unVT x = unVTVa x
@@ -182,16 +197,20 @@ instance FromVariant [Int8]                         where unVT (VT_I1a       x) 
 instance FromVariant [Word8]                        where unVT (VT_UI1a      x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Word16]                       where unVT (VT_UI2a      x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Word32]                       where unVT (VT_UI4a      x) = toList                      x; unVT x = unVTVa x
+instance FromVariant [Word64]                       where unVT (VT_UI8a      x) = toList                      x; unVT x = unVTVa x
 instance FromVariant [Int]                          where unVT (VT_INTa      x) = toList                      x
                                                           unVT (VT_I2a       x) = map fromIntegral . toList $ x
                                                           unVT (VT_I4a       x) = map fromIntegral . toList $ x
+                                                          unVT (VT_I8a       x) = map fromIntegral . toList $ x
                                                           unVT (VT_I1a       x) = map fromIntegral . toList $ x
                                                           unVT (VT_UI1a      x) = map fromIntegral . toList $ x
-                                                          unVT (VT_UI2a      x) = map fromIntegral . toList $ x; unVT x = unVTVa x
+                                                          unVT (VT_UI2a      x) = map fromIntegral . toList $ x;
+                                                          unVT (VT_UI4a      x) = map fromIntegral . toList $ x; unVT x = unVTVa x
 instance FromVariant [Word]                         where unVT (VT_UINTa     x) = toList x
                                                           unVT (VT_UI1a      x) = map fromIntegral . toList $ x
                                                           unVT (VT_UI2a      x) = map fromIntegral . toList $ x
-                                                          unVT (VT_UI4a      x) = map fromIntegral . toList $ x; unVT x = unVTVa x
+                                                          unVT (VT_UI4a      x) = map fromIntegral . toList $ x;
+                                                          unVT (VT_UI8a      x) = map fromIntegral . toList $ x; unVT x = unVTVa x
 
 -- TODO: Report incorrect type of *list* rather than member
 unVTVa :: (FromVariant a) => Variant -> [a]
@@ -218,4 +237,4 @@ vtArgOut   :: (FromVariant a) => Stack b (b, a)
 vtArgOut = mapSecondStack unVT <<< argOut
 
 mapSecondStack   :: (a -> b) -> Stack (c, a) (c, b)
-mapSecondStack = liftM . (id ***)
+mapSecondStack = fmap . (id ***)
