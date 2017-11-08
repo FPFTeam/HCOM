@@ -22,7 +22,7 @@ Library
                      System.Win32.HCOM.Gen.IDictionary
     exposed: True
     buildable: True
-    build-depends: base >4, mtl >1, time >1, bytestring >0.9
+    build-depends: base >4, mtl >1, time >1, bytestring >0.9, ghc-prim
     pkgconfig-depends:
     if os(windows)
         extra-libraries: ole32 oleaut32

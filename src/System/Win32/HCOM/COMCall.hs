@@ -1,5 +1,6 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE MagicHash #-}
 
 --
 -- COMCall.hs:
@@ -18,7 +19,9 @@ module System.Win32.HCOM.COMCall
 import Control.Category hiding ((.), id)
 import Data.Void
 import Foreign
-import Unsafe.Coerce
+import GHC.Exts
+import GHC.Prim
+import GHC.Types
 
 import System.Win32.HCOM.Flatten
 import System.Win32.HCOM.RawFunctions(HRESULT)
@@ -156,10 +159,9 @@ rawVCall obj idx args = do
   let fullArgs = argIn fn >>> argIn obj >>> args
   -- Our thunk should be wrapped up to put the HResult into a
   -- pseudo-list format we can then flatten.
-      thunk = fmap ((,) ()) . fmap fromIntegral . callThunk . map reinterpret_cast
+      thunk = fmap ((,) ()) . fmap fromIntegral . callThunk . map word2ptr
   -- Finally, do the invocation and flatten the result into a plain tuple.
   flatten <$> (thunk #< fullArgs)
 
--- TODO replace with github.com/nh2/reinterpret-cast
-reinterpret_cast :: Word -> Ptr Void
-reinterpret_cast = unsafeCoerce
+word2ptr :: Word -> Ptr Void
+word2ptr (W# w)= Ptr (int2Addr# (word2Int# w))
