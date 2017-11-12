@@ -98,7 +98,7 @@ foreign import stdcall "SafeArrayDestroy"  rawSafeArrayDestroy  :: Ptr SAFEARRAY
 foreign import stdcall "SafeArrayGetDim"   rawSafeArrayGetDim   :: Ptr SAFEARRAY -> IO Word
 foreign import stdcall "SafeArrayGetLBound"rawSafeArrayGetLBound:: Ptr SAFEARRAY -> Word -> Ptr Word -> IO HRESULT -- Note that dims are indexed from 1
 foreign import stdcall "SafeArrayGetUBound"rawSafeArrayGetUBound:: Ptr SAFEARRAY -> Word -> Ptr Word -> IO HRESULT -- Note that dims are indexed from 1
-foreign import stdcall "SafeArrayGetElemSize" rawSafeArrayGetElemSize :: Ptr SAFEARRAY -> IO Word
+foreign import stdcall "SafeArrayGetElemsize" rawSafeArrayGetElemSize :: Ptr SAFEARRAY -> IO Word
 foreign import stdcall "SafeArrayAccessData"  rawSafeArrayAccessData  :: Ptr SAFEARRAY -> Ptr (Ptr a) -> IO HRESULT
 foreign import stdcall "SafeArrayAccessData"  rawSafeArrayUnaccessData  :: Ptr SAFEARRAY -> IO HRESULT
 
