@@ -5,18 +5,18 @@
 /* link this file in with the server and any clients */
 
 
- /* File created by MIDL compiler version 6.00.0366 */
-/* at Tue Jan 05 14:50:02 2010
+ /* File created by MIDL compiler version 8.00.0603 */
+/* at Sun Nov 12 16:23:42 2017
  */
-/* Compiler settings for .\SAtest.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run)
-    protocol : dce , ms_ext, c_ext
+/* Compiler settings for SAtest.idl:
+    Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 
+    protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
-//@@MIDL_FILE_HEADING(  )
+/* @@MIDL_FILE_HEADING(  ) */
 
 #pragma warning( disable: 4049 )  /* more than 64k source lines */
 
