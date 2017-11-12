@@ -215,10 +215,10 @@ sa ! indices = saData sa !! offset where
 -- SAFEARRAY field accessors.
 --
 
-saGetEltSize :: Ptr SAFEARRAY -> IO Word
+saGetEltSize :: Ptr SAFEARRAY -> IO Word32
 saGetEltSize = rawSafeArrayGetElemSize
 
-saWithData :: Ptr SAFEARRAY -> (Ptr a -> IO b) -> IO b
+saWithData :: Ptr SAFEARRAY -> (Ptr Word8 -> IO b) -> IO b
 saWithData sa cont = do
   p <- alloca(\p -> rawSafeArrayAccessData sa p >>= checkHRInner >> peek p)
   res <- cont p

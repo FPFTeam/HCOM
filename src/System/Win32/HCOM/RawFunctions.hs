@@ -95,10 +95,10 @@ foreign import stdcall "CLSIDFromProgID"   rawCLSIDFromProgID   :: Ptr OLECHAR -
 foreign import stdcall "CoCreateGuid"      rawCoCreateGuid      :: Ptr RawGUID -> IO HRESULT
 foreign import stdcall "SafeArrayCreate"   rawSafeArrayCreate   :: VARTYPE -> DWORD -> Ptr DWORD -> IO (Ptr SAFEARRAY)
 foreign import stdcall "SafeArrayDestroy"  rawSafeArrayDestroy  :: Ptr SAFEARRAY -> IO ()
-foreign import stdcall "SafeArrayGetDim"   rawSafeArrayGetDim   :: Ptr SAFEARRAY -> IO Word
-foreign import stdcall "SafeArrayGetLBound"rawSafeArrayGetLBound:: Ptr SAFEARRAY -> Word -> Ptr Word -> IO HRESULT -- Note that dims are indexed from 1
-foreign import stdcall "SafeArrayGetUBound"rawSafeArrayGetUBound:: Ptr SAFEARRAY -> Word -> Ptr Word -> IO HRESULT -- Note that dims are indexed from 1
-foreign import stdcall "SafeArrayGetElemsize" rawSafeArrayGetElemSize :: Ptr SAFEARRAY -> IO Word
+foreign import stdcall "SafeArrayGetDim"   rawSafeArrayGetDim   :: Ptr SAFEARRAY -> IO Word32
+foreign import stdcall "SafeArrayGetLBound"rawSafeArrayGetLBound:: Ptr SAFEARRAY -> Word32 -> Ptr Word32 -> IO HRESULT -- Note that dims are indexed from 1
+foreign import stdcall "SafeArrayGetUBound"rawSafeArrayGetUBound:: Ptr SAFEARRAY -> Word32 -> Ptr Word32 -> IO HRESULT -- Note that dims are indexed from 1
+foreign import stdcall "SafeArrayGetElemsize" rawSafeArrayGetElemSize :: Ptr SAFEARRAY -> IO Word32
 foreign import stdcall "SafeArrayAccessData"  rawSafeArrayAccessData  :: Ptr SAFEARRAY -> Ptr (Ptr a) -> IO HRESULT
-foreign import stdcall "SafeArrayAccessData"  rawSafeArrayUnaccessData  :: Ptr SAFEARRAY -> IO HRESULT
+foreign import stdcall "SafeArrayUnaccessData"  rawSafeArrayUnaccessData  :: Ptr SAFEARRAY -> IO HRESULT
 
