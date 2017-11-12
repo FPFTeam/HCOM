@@ -22,6 +22,8 @@ module System.Win32.HCOM.SafeArray
 , fromList2D
 , toList2D
 , (!)
+, marshalSafeArray
+, unmarshalSafeArray
 ) where
 
 import Control.Monad

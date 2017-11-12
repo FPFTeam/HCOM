@@ -20,6 +20,7 @@ tested-with:
 Library
     exposed-modules: System.Win32.HCOM
                      System.Win32.HCOM.Gen.IDictionary
+                     System.Win32.HCOM.SafeArray
     exposed: True
     buildable: True
     build-depends: base >4, mtl >1, time >1, bytestring >0.9, ghc-prim
@@ -39,15 +40,14 @@ Library
                    System.Win32.HCOM.Stack
                    System.Win32.HCOM.Variant
                    System.Win32.HCOM.VariantConversion
-                   System.Win32.HCOM.SafeArray
                    System.Win32.HCOM.Tags
                    System.Win32.HCOM.Extras
     ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind
 
 Test-suite SATest
     type:       exitcode-stdio-1.0
-    main-is:    TestHCOMSafeArrays.hs
-    ghc-options:         -main-is TestHCOMSafeArrays
-    build-depends: base, bytestring, HCOM, time
+    main-is:    Test.hs
+    ghc-options:         -main-is Test
+    build-depends: base, bytestring, HCOM, hspec, time
     hs-source-dirs:      Testing
-    other-modules: ISATest
+    other-modules: ISATest, MarshallingSpec, SafeArraySpec
