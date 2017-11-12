@@ -1,10 +1,9 @@
 -- This file is licensed under the New BSD License
 module TestHCOMSafeArrays where
 
-import Control.Applicative
 import Control.Monad
+import qualified Data.ByteString.Char8 as B
 import Data.Char
-import Data.List
 import Data.Time
 import Foreign
 
@@ -14,11 +13,13 @@ import ISATest
 -- {50C1BE3B-1298-4D57-A781-2212EBFFD961}
 clsid_MySATest = GUID 0x50C1BE3B 0x1298 0x4D57 0xA781 0x22 0x12 0xEB 0xFF 0xD9 0x61
 
+clsid_Scripting_Dictionary = GUID 0xEE09B103 0x97E0 0x11CF 0x978F 0x00 0xA0 0x24 0x63 0xE0 0x6F
+
 -- Test that passing the array to a COM function which'll then index
 -- in is equivalent to looking it up ourselves.
 testLookup ptr sa = do
   res <- ptr ~> isatest_4 sa
-  let res' = saGet [3, 4] sa
+  let res' = sa ! [3, 4]
   when (res /= res') $
        error "Lookup mismatch!"
 
@@ -70,13 +71,13 @@ testBoundsPreservation ptr = do
        error "Bounds preservation test failed"
 
 testBool ptr = do
-  let sa = saCreate1d [True, False, True]
+  let sa = fromList [True, False, True]
   sa' <- ptr ~> isatest_bool sa
   when (sa /= sa') $
        error "Bool test failed"
 
 testBSTR ptr = do
-  let sa = saCreate1d ["FOO", "BAR", "Bazzle", ""]
+  let sa = fromList ["FOO", "BAR", "Bazzle", ""]
   sa' <- ptr ~> isatest_bstr sa
   when (sa /= sa') $
        error "BSTR test failed"
@@ -84,14 +85,14 @@ testBSTR ptr = do
 testObj ptr = do
   tmpPtr1 <- coCreate clsid_Scripting_Dictionary
   tmpPtr2 <- snd <$> queryInterface ptr
-  let sa = saCreate1d [tmpPtr1, tmpPtr2, nullCOMPtr, tmpPtr1]
+  let sa = fromList [tmpPtr1, tmpPtr2, nullCOMPtr, tmpPtr1]
   sa' <- ptr ~> isatest_obj sa
   when (sa /= sa') $
        error "Object test failed"
 
 testVar ptr = do
   tmpPtr <- snd <$> queryInterface ptr
-  let sa = saCreate1d [vt (42 :: Int16),
+  let sa = fromList [vt (42 :: Int16),
                        vt True,
                        vt "Hello!",
                        vt (tmpPtr :: COMPtr IUnknown)]
@@ -100,14 +101,14 @@ testVar ptr = do
        error "Variant test failed"
 
 testSAInVar ptr = do
-  let v = vt $ saCreate1d ["Foo", "Bar", "Barney"]
+  let v = vt $ fromList $ fmap B.pack ["Foo", "Bar", "Barney"]
   v' <- ptr ~> isatest_v v
   when (v /= v') $
        error "SafeArray-in-Variant test failed"
 
 testSAInVar2 ptr = do
   tmpPtr <- snd <$> queryInterface ptr
-  let v = vt $ saCreate1d [vt "Foo",
+  let v = vt $ fromList [vt "Foo",
                            vt False,
                            vt (tmpPtr :: COMPtr IDispatch),
                            vt (1234.567 :: Float),

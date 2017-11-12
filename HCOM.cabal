@@ -1,6 +1,6 @@
 name: HCOM
 version: 0.2.1
-cabal-version: >= 1.2
+cabal-version: >= 1.8
 build-type: Simple
 license: BSD3
 license-file: LICENSE
@@ -43,3 +43,11 @@ Library
                    System.Win32.HCOM.Tags
                    System.Win32.HCOM.Extras
     ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind
+
+Test-suite SATest
+    type:       exitcode-stdio-1.0
+    main-is:    TestHCOMSafeArrays.hs
+    ghc-options:         -main-is TestHCOMSafeArrays
+    build-depends: base, bytestring, HCOM, time
+    hs-source-dirs:      Testing
+    other-modules: ISATest
