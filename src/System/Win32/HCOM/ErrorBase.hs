@@ -95,7 +95,7 @@ data ErrorInfo = ErrorInfo
 
 -- Gets to the nub of what people want to see in practice!
 instance Show ErrorInfo where
-    show ei = eiSource ei ++ ": " ++ eiDesc ei
+    show ei = eiSource ei ++ ": " ++ eiDesc ei ++ "(" ++ show (eiGUID ei) ++ ")"
 
 ------------------------------------------------------------------------
 -- COM error value
