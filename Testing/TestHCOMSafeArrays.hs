@@ -120,18 +120,28 @@ testSAInVar2 ptr = do
        error "SafeArray-in-Variant (2) test failed"
 
 main = {- replicateM_ 10 $ -} coRun $ do
+  putStrLn "Testing"
   ptr <- coCreate clsid_MySATest :: IO (COMPtr ISATest)
-
+  putStr "."
   -- isatest_[1..3] (used in these tests) test both different
   -- primitive types, and different parameter-passing mechanisms.
   testIn                 ptr
+  putStr "."
   testInOut              ptr
+  putStr "."
   testOut                ptr
+  putStr "."
   testBoundsPreservation ptr
+  putStr "."
   testBool               ptr
+  putStr "."
   testBSTR               ptr
+  putStr "."
   testObj                ptr
+  putStr "."
   testVar                ptr
+  putStr "."
   testSAInVar            ptr
+  putStr "."
   testSAInVar2           ptr
   putStrLn "All tests passed."
