@@ -211,11 +211,15 @@ instance Stackable Float  where
     argOut     = ao
 
 doubleToRep :: Double -> IO [Word]
-doubleToRep f = with f $ \p -> do
-    let wp = castPtr p
-    lo <- peek wp
-    hi <- peekElemOff wp 1
-    return [lo, hi]
+doubleToRep f = with f $ \ptr ->
+  case sizeOf (undefined::Word) of
+    8 -> (:[]) <$> peek (castPtr ptr)
+    4 -> do
+      let loPtr = castPtr ptr
+      lo <- peek loPtr
+      hi <- peekElemOff loPtr 1
+      return [lo,hi]
+    _ -> error "unsupported"
 
 instance Stackable Double  where
     argIn  x f = do rep <- lift $ doubleToRep x ; pushStack rep f
