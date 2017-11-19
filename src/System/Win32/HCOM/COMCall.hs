@@ -66,25 +66,78 @@ type III                       = Word   -> II
 type IID                       = Word   -> ID
 type IDI                       = Word   -> DI
 type IDD                       = Word   -> DD
+type IIII                      = Word   -> III
+type IIIII                     = Word   -> IIII
+type IIIIII                    = Word   -> IIIII
+type IIIIIII                   = Word   -> IIIIII
+type IIIIIIII                  = Word   -> IIIIIII
+type IIIIIIIII                 = Word   -> IIIIIIII
+type IIIIIIIIII                = Word   -> IIIIIIIII
+type IIIIIIIIIII               = Word   -> IIIIIIIIII
+type IIIIIIIIIIII              = Word   -> IIIIIIIIIII
+type IIIIIIIIIIIII             = Word   -> IIIIIIIIIIII
+type IIIIIIIIIIIIII            = Word   -> IIIIIIIIIIIII
+type IIIIIIIIIIIIIII           = Word   -> IIIIIIIIIIIIII
+type IIIIIIIIIIIIIIII          = Word   -> IIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIII         = Word   -> IIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIII        = Word   -> IIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIII       = Word   -> IIIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIIII      = Word   -> IIIIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIIIII     = Word   -> IIIIIIIIIIIIIIIIIIII
 
-foreign import stdcall "dynamic" _I      :: FunPtr I     -> I
-foreign import stdcall "dynamic" _II     :: FunPtr II    -> II
-foreign import stdcall "dynamic" _ID     :: FunPtr ID    -> ID
-foreign import stdcall "dynamic" _III    :: FunPtr III   -> III
-foreign import stdcall "dynamic" _IID    :: FunPtr IID   -> IID
-foreign import stdcall "dynamic" _IDI    :: FunPtr IDI   -> IDI
-foreign import stdcall "dynamic" _IDD    :: FunPtr IDD   -> IDD
+foreign import stdcall "dynamic" _I                    :: FunPtr I                    -> I
+foreign import stdcall "dynamic" _II                   :: FunPtr II                   -> II
+foreign import stdcall "dynamic" _ID                   :: FunPtr ID                   -> ID
+foreign import stdcall "dynamic" _III                  :: FunPtr III                  -> III
+foreign import stdcall "dynamic" _IID                  :: FunPtr IID                  -> IID
+foreign import stdcall "dynamic" _IDI                  :: FunPtr IDI                  -> IDI
+foreign import stdcall "dynamic" _IDD                  :: FunPtr IDD                  -> IDD
+foreign import stdcall "dynamic" _IIII                 :: FunPtr IIII                 -> IIII
+foreign import stdcall "dynamic" _IIIII                :: FunPtr IIIII                -> IIIII
+foreign import stdcall "dynamic" _IIIIII               :: FunPtr IIIIII               -> IIIIII
+foreign import stdcall "dynamic" _IIIIIII              :: FunPtr IIIIIII              -> IIIIIII
+foreign import stdcall "dynamic" _IIIIIIII             :: FunPtr IIIIIIII             -> IIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIII            :: FunPtr IIIIIIIII            -> IIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIII           :: FunPtr IIIIIIIIII           -> IIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIII          :: FunPtr IIIIIIIIIII          -> IIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIII         :: FunPtr IIIIIIIIIIII         -> IIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIII        :: FunPtr IIIIIIIIIIIII        -> IIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIII       :: FunPtr IIIIIIIIIIIIII       -> IIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIII      :: FunPtr IIIIIIIIIIIIIII      -> IIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIII     :: FunPtr IIIIIIIIIIIIIIII     -> IIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIII    :: FunPtr IIIIIIIIIIIIIIIII    -> IIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIII   :: FunPtr IIIIIIIIIIIIIIIIII   -> IIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIII  :: FunPtr IIIIIIIIIIIIIIIIIII  -> IIIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIIII :: FunPtr IIIIIIIIIIIIIIIIIIII -> IIIIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIIIII:: FunPtr IIIIIIIIIIIIIIIIIIIII-> IIIIIIIIIIIIIIIIIIIII
 
-{-# INLINE callThunk #-}
-callThunk :: [SE] -> IO HRESULT
-callThunk [I funptr, I a]                                                   = _I      (word2ptr funptr) a
-callThunk [I funptr, I a, I b]                                              = _II     (word2ptr funptr) a b
-callThunk [I funptr, I a, D b]                                              = _ID     (word2ptr funptr) a b
-callThunk [I funptr, I a, I b, I c]                                         = _III    (word2ptr funptr) a b c
-callThunk [I funptr, I a, I b, D c]                                         = _IID    (word2ptr funptr) a b c
-callThunk [I funptr, I a, D b, I c]                                         = _IDI    (word2ptr funptr) a b c
-callThunk [I funptr, I a, D b, D c]                                         = _IDD    (word2ptr funptr) a b c
-callThunk _ = error "Internal error in vcall: Too many arguments. Use Template Haskell to generate all the possibilities."
+{-# INLINE call #-}
+call :: [SE] -> IO HRESULT
+call [I funptr,I a]                                                                             = _I                    (word2ptr funptr) a
+call [I funptr,I a,I b]                                                                         = _II                   (word2ptr funptr) a b
+call [I funptr,I a,D b]                                                                         = _ID                   (word2ptr funptr) a b
+call [I funptr,I a,I b,I c]                                                                     = _III                  (word2ptr funptr) a b c
+call [I funptr,I a,I b,D c]                                                                     = _IID                  (word2ptr funptr) a b c
+call [I funptr,I a,D b,I c]                                                                     = _IDI                  (word2ptr funptr) a b c
+call [I funptr,I a,D b,D c]                                                                     = _IDD                  (word2ptr funptr) a b c
+call [I funptr,I a,I b,I c,I d]                                                                 = _IIII                 (word2ptr funptr) a b c d
+call [I funptr,I a,I b,I c,I d,I e]                                                             = _IIIII                (word2ptr funptr) a b c d e
+call [I funptr,I a,I b,I c,I d,I e,I f]                                                         = _IIIIII               (word2ptr funptr) a b c d e f
+call [I funptr,I a,I b,I c,I d,I e,I f,I g]                                                     = _IIIIIII              (word2ptr funptr) a b c d e f g
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h]                                                 = _IIIIIIII             (word2ptr funptr) a b c d e f g h
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i]                                             = _IIIIIIIII            (word2ptr funptr) a b c d e f g h i
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j]                                         = _IIIIIIIIII           (word2ptr funptr) a b c d e f g h i j
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k]                                     = _IIIIIIIIIII          (word2ptr funptr) a b c d e f g h i j k
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l]                                 = _IIIIIIIIIIII         (word2ptr funptr) a b c d e f g h i j k l
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m]                             = _IIIIIIIIIIIII        (word2ptr funptr) a b c d e f g h i j k l m
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n]                         = _IIIIIIIIIIIIII       (word2ptr funptr) a b c d e f g h i j k l m n
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o]                     = _IIIIIIIIIIIIIII      (word2ptr funptr) a b c d e f g h i j k l m n o
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p]                 = _IIIIIIIIIIIIIIII     (word2ptr funptr) a b c d e f g h i j k l m n o p
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q]             = _IIIIIIIIIIIIIIIII    (word2ptr funptr) a b c d e f g h i j k l m n o p q
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r]         = _IIIIIIIIIIIIIIIIII   (word2ptr funptr) a b c d e f g h i j k l m n o p q r
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r,I s]     = _IIIIIIIIIIIIIIIIIII  (word2ptr funptr) a b c d e f g h i j k l m n o p q r s
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r,I s,I t] = _IIIIIIIIIIIIIIIIIIII (word2ptr funptr) a b c d e f g h i j k l m n o p q r s t
+call _ = error "Internal error in vcall: Too many arguments. Use Template Haskell to generate all the possibilities."
 
 ------------------------------------------------------------------------
 -- COM function invocation.
@@ -107,7 +160,7 @@ rawVCall obj idx args = do
   let fullArgs = argIn fn >>> argIn obj >>> args
   -- Our thunk should be wrapped up to put the HResult into a
   -- pseudo-list format we can then flatten.
-      thunk = fmap ((,) ()) . fmap fromIntegral . callThunk
+      thunk = fmap ((,) ()) . fmap fromIntegral . call
   -- Finally, do the invocation and flatten the result into a plain tuple.
   res <- flatten <$> (thunk #< fullArgs)
   return res
