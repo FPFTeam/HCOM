@@ -118,6 +118,8 @@ Need to check for null pointers more carefully in returned values!
 When we do explicit memory management, make it exception-safe? (cf
 RAII in C++)
 
+Add handling for methods with >2 arguments in x64 (up to ~20 arguments supported in x86).
+
 References:
 -----------
 
