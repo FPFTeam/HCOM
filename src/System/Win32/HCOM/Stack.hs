@@ -179,10 +179,15 @@ ao f = alloca' $ \ptr -> do
          out <- lift $ peek ptr
          return (res, out)
 
+instance Stackable Int      where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int32    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+-- TODO This instance is only really supported in x64
+instance Stackable Int64    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word16   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+-- TODO This instance is only really supported in x64
+instance Stackable Word64   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int16    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word8    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int8     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
