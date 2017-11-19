@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ViewPatterns #-}
 module MarshallingSpec(marshallingSpec) where
 
 import Test.Hspec
@@ -13,7 +14,7 @@ safeArraySpec = describe "safearray" $ do
     prop "bool" $ \(sa :: [Bool]) ->
       toList(fromList sa) == sa
   describe "marshal" $ do
-    prop "bool" $ \(sa :: [Bool]) -> do
+    prop "bool" $ \((True:) -> sa :: [Bool]) -> do
       msa <- marshalSafeArray $ fromList sa
       sa' <- unmarshalSafeArray msa
       toList sa' `shouldBe` sa
