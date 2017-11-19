@@ -112,7 +112,7 @@ instance Stackable GUID where
                    (do
                       -- GUID takes 4 words of the stack.
                       elts <- lift $ peekArray 4 $ castPtr ptr
-                      pushStack elts f)
+                      pushStack (map I elts) f)
 
     argInByRef x f = do
       allocaBytes' sizeofGUID $ \ptr -> do

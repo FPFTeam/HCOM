@@ -260,8 +260,9 @@ instance Stackable Variant where
                   (freeVariant ptr)
                   (do
                      -- Variant takes 4 words of the stack.
+                     -- XXX is this still true in x64
                      elts <- lift $ peekArray 4 $ castPtr ptr
-                     pushStack elts f)
+                     pushStack (map I elts) f)
 
     argInByRef x f =
       allocaBytes' sizeofVariant $ \ptr ->

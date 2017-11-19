@@ -34,7 +34,7 @@ instance IsString GUID where
       -- entries are Word32s. Should probably be changed back to how
       -- it was!
       flip runReaderT [] $ argIn str $ do
-        [strPtrAsNum] <- ask
+        [I strPtrAsNum] <- ask
         lift $ do
           let strPtr = nullPtr `plusPtr` fromIntegral strPtrAsNum
           (res, hr) <- withGUIDOutPtr $ rawCLSIDFromProgID strPtr

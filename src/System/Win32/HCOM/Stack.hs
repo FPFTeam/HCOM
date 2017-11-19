@@ -11,6 +11,7 @@
 module System.Win32.HCOM.Stack
 ( Stackable(..) -- Things that can be put on a stack
 , Stack         -- A stack
+, SE(..)
 , (#<)          -- Stack evaluation
   -- For implementing stackable
 , StackM
@@ -78,7 +79,12 @@ import Foreign
 -- type Stack a b = ReaderT [Word] IO a -> ReaderT [Word] IO b
 --
 
-type StackM = ReaderT [Word] IO
+-- | A stack element is a Word modelling either an Integer/pointer or a Floating point value.
+--   This distinction is only relevant in x64 due to the calling convention
+data SE = I Word | D Double
+  deriving Show
+
+type StackM = ReaderT [SE] IO
 
 type Stack a b = StackM a -> StackM b
 
@@ -100,13 +106,13 @@ class Stackable a where
 
 -- Evaluate a stack.
 infix 0 #<
-(#<) :: ([Word] -> IO a) -> Stack a b -> IO b
+(#<) :: ([SE] -> IO a) -> Stack a b -> IO b
 fn #< stackOp =
     let innerOp = ask >>= (lift . fn)
      in runReaderT (stackOp innerOp) []
 
 -- Put stuff on a stack, then execute the next thing.
-pushStack :: [Word] -> StackM a -> StackM a
+pushStack :: [SE] -> StackM a -> StackM a
 pushStack xs = local (xs ++)
 
 ------------------------------------------------------------------------
@@ -156,7 +162,7 @@ withForeignPtr' = liftNest . withForeignPtr
 -- works ok for little-endian systems.
 
 ai :: Integral a => a -> StackM b -> StackM b
-ai x = pushStack [fromIntegral x]
+ai x = pushStack [I $ fromIntegral x]
 
 aibr :: (Stackable a, Storable a) => a -> StackM b -> StackM b
 aibr x f = with' x $ \ptr -> argIn ptr f
@@ -173,7 +179,7 @@ ao f = alloca' $ \ptr -> do
          out <- lift $ peek ptr
          return (res, out)
 
-instance Stackable Word   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Word     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int32    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word16   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
@@ -198,11 +204,11 @@ instance Stackable (Ptr a)  where
 -- Marshalling of floating point types.
 --
 
-floatToRep :: Float -> IO [Word]
+floatToRep :: Float -> IO [SE]
 floatToRep f = with f $ \p -> do
     let wp = castPtr p
     rep <- peek wp
-    return [rep]
+    return [D rep]
 
 instance Stackable Float  where
     argIn x f  = do rep <- lift $ floatToRep x ; pushStack rep f
@@ -210,15 +216,15 @@ instance Stackable Float  where
     argInOut   = aio
     argOut     = ao
 
-doubleToRep :: Double -> IO [Word]
+doubleToRep :: Double -> IO [SE]
 doubleToRep f = with f $ \ptr ->
   case sizeOf (undefined::Word) of
-    8 -> (:[]) <$> peek (castPtr ptr)
+    8 -> return [D f]
     4 -> do
       let loPtr = castPtr ptr
       lo <- peek loPtr
       hi <- peekElemOff loPtr 1
-      return [lo,hi]
+      return [I lo, I hi] -- The distinction doesn't matter in the calling convention used in x86
     _ -> error "unsupported"
 
 instance Stackable Double  where
