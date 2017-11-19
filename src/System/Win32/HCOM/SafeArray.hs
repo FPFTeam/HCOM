@@ -315,13 +315,13 @@ instance COMStorable a => Stackable (SafeArray a) where
              freeSafeArray
              (`argInByRef` f)
 
-    argInOut x f =
-      alloca' $ \ptr ->
-      bracket_' (marshalSafeArray x >>= poke ptr)
-              (freeSafeArray      =<< peek ptr)
-              (do
+    argInOut x f = do
+      bracket'
+              (marshalSafeArray x)
+              freeSafeArray
+              (\ptr -> do
                  res <- argIn ptr f
-                 sa  <- lift $ unmarshalSafeArray =<< peek ptr
+                 sa  <- lift $ unmarshalSafeArray ptr
                  return (res, sa))
 
     argOut f =
