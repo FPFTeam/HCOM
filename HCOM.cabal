@@ -42,7 +42,6 @@ Library
                    System.Win32.HCOM.VariantConversion
                    System.Win32.HCOM.Tags
                    System.Win32.HCOM.Extras
-    ghc-options: -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind
 
 Test-suite SATest
     type:       exitcode-stdio-1.0

@@ -4,3 +4,7 @@ packages:
   - .
 
 extra-deps: []
+
+ghc-options: 
+  HCOM:
+    -Wall -fno-warn-missing-signatures -fno-warn-name-shadowing -fno-warn-type-defaults -fno-warn-unused-do-bind
