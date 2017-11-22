@@ -52,8 +52,6 @@ Files:
 Stack.hs:        Functions to help construct a call stack to be used
                  with the COM call.
 
-Thunk.s:         A little assembly stub used by COMCall.hs.
-
 COMCall.hs:      Given an object, vtbl entry and stack, invoke a COM
                  function.
 
