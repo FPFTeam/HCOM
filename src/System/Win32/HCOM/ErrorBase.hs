@@ -61,12 +61,15 @@ succeeded = not . failed
 -- Error message extraction.
 --
 
+c_FORMAT_MESSAGE_ALLOCATE_BUFFER :: DWORD
+c_FORMAT_MESSAGE_FROM_SYSTEM     :: DWORD
+c_FORMAT_MESSAGE_IGNORE_INSERTS  :: DWORD
 c_FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100 :: DWORD
 c_FORMAT_MESSAGE_FROM_SYSTEM     = 0x00001000 :: DWORD
 c_FORMAT_MESSAGE_IGNORE_INSERTS  = 0x00000200 :: DWORD
 
 stringForErrNo :: HRESULT -> IO String
-stringForErrNo hr = do
+stringForErrNo hr =
   bracket (alloca $ \strPtrDest ->
                do
                  i <- rawFormatMessageA (c_FORMAT_MESSAGE_ALLOCATE_BUFFER .|.

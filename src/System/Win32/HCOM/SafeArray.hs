@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 -- This file is licensed under the New BSD License
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 --
@@ -17,8 +18,8 @@ module System.Win32.HCOM.SafeArray
 , SAIndex
 , newSafeArray
 , newSafeArrayM
-, fromList
-, toList
+, fromList1D
+, toList1D
 , fromList2D
 , toList2D
 , (!)
@@ -32,6 +33,7 @@ import Control.Monad.Trans
 import Data.Time
 import Data.List
 import Foreign
+import GHC.Exts (IsList(..))
 
 import System.Win32.HCOM.ErrorBase
 import {-# SOURCE #-} System.Win32.HCOM.ErrorUtils
@@ -150,6 +152,11 @@ data SafeArray a = SafeArray
      saData :: [a]
     } deriving (Show, Eq, Ord)
 
+instance IsList (SafeArray a) where
+  type Item (SafeArray a) = a
+  toList = toList1D
+  fromList = fromList1D
+
 ------------------------------------------------------------------------
 -- SafeArray accessor functions.
 --
@@ -170,13 +177,13 @@ newSafeArray :: [SABound] -> ([SAIndex] -> a) -> SafeArray a
 newSafeArray bounds f = runIdentity $ newSafeArrayM bounds (return . f)
 
 -- | A simple 1d SafeArray creator.
-fromList :: [a] -> SafeArray a
-fromList elts = SafeArray [(0, length elts - 1)] elts
+fromList1D :: [a] -> SafeArray a
+fromList1D elts = SafeArray [(0, length elts - 1)] elts
 
 -- | A conversion to a list.
-toList :: SafeArray a -> [a]
-toList (SafeArray [_] elts) = elts
-toList _                    = throwHCOM "Can't convert a multi-dimensional Safe Array to a list."
+toList1D :: SafeArray a -> [a]
+toList1D (SafeArray [_] elts) = elts
+toList1D _                    = throwHCOM "Can't convert a multi-dimensional Safe Array to a list."
 
 -- | A simple 2d SafeArray creator.
 fromList2D :: [[a]] -> SafeArray a

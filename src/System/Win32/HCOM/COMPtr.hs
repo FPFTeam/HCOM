@@ -1,6 +1,5 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleInstances #-}
 
@@ -121,11 +120,12 @@ comFinalizer = void . rawRelease
 -- | A null COM pointer.
 nullCOMPtr :: COMPtr a
 nullCOMPtr = unsafePerformIO (CP <$> newForeignPtr_ nullPtr)
+{-# NOINLINE nullCOMPtr #-}
 
 -- Create a COMPtr from an ordinary pointer, taking a reference.
 mkCOMPtr :: LPUNKNOWN -> IO (COMPtr a)
 mkCOMPtr obj = do
-  rawAddRef obj
+  _ <- rawAddRef obj
   CP <$> newForeignPtr obj (comFinalizer obj)
 
 -- Perform an operation using the raw COM pointer.
@@ -136,9 +136,9 @@ withRawCOMPtr (CP fptr) = withForeignPtr fptr
 -- has its own reference count that whoever receives it must
 -- eventually release.
 getRawCOMPtrWithRef :: COMPtr a -> IO LPUNKNOWN
-getRawCOMPtrWithRef comPtr = do
+getRawCOMPtrWithRef comPtr =
   withRawCOMPtr comPtr $ \obj -> do
-    rawAddRef obj
+    _ <- rawAddRef obj
     return obj
 
 -- Create a pointer to an 'out parameter' slot, from which we'll take
@@ -149,8 +149,8 @@ getRawCOMPtrWithRef comPtr = do
 -- the release in 'finally'), but instead the COMPtr takes ownership
 -- of the thing being pointed to.
 mkOutParam :: (Ptr LPUNKNOWN -> IO a) -> IO (a, COMPtr b)
-mkOutParam op = do
-  with nullPtr $ \ptr -> do
+mkOutParam op =
+  with nullPtr $ \ptr ->
     finally (do
                res    <- op ptr
                comObj <- mkCOMPtr =<< peek ptr
@@ -202,10 +202,10 @@ qiChecked obj = unsafePerformIO $ do
 
 instance Stackable (COMPtr a) where
     -- In this case, no need to bump reference counts.
-    argIn (CP fptr) f = do
+    argIn (CP fptr) f =
       withForeignPtr' fptr $ \obj -> argIn obj f
 
-    argInByRef (CP fptr) f = do
+    argInByRef (CP fptr) f =
       withForeignPtr' fptr $ \obj -> argInByRef obj f
 
     -- On the way in, we created a raw pointer with a reference count.
@@ -214,13 +214,13 @@ instance Stackable (COMPtr a) where
     --
     -- On the way out, we have a reference to whatever's returned, so
     -- we take ownership of it with a new COMPtr.
-    argInOut comPtr f = do
+    argInOut comPtr f =
       liftNest mkOutParam $ \ptr -> do
         lift $ getRawCOMPtrWithRef comPtr >>= poke ptr
         argIn ptr f
 
     -- No need to bump reference counts.
-    argOut f = do
+    argOut f =
       liftNest mkOutParam $ \ptr -> argIn ptr f
 
 ------------------------------------------------------------------------

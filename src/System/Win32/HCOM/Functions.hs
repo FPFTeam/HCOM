@@ -50,7 +50,6 @@ module System.Win32.HCOM.Functions
 , coCreateGuid
 ) where
 
-import Control.Applicative
 import Foreign
 import System.Mem
 
@@ -64,13 +63,17 @@ import System.Win32.HCOM.RawFunctions
 -- COM initialization/shutdown
 --
 
+c_COINIT_APARTMENTTHREADED  :: DWORD -- Apartment model
+c_COINIT_MULTITHREADED      :: DWORD -- OLE calls objects on any thread.
+c_COINIT_DISABLE_OLE1DDE    :: DWORD -- Don't use DDE for Ole1 support.
+c_COINIT_SPEED_OVER_MEMORY  :: DWORD -- Trade memory for speed.
 c_COINIT_APARTMENTTHREADED  = 0x2 :: DWORD -- Apartment model
 c_COINIT_MULTITHREADED      = 0x0 :: DWORD -- OLE calls objects on any thread.
 c_COINIT_DISABLE_OLE1DDE    = 0x4 :: DWORD -- Don't use DDE for Ole1 support.
 c_COINIT_SPEED_OVER_MEMORY  = 0x8 :: DWORD -- Trade memory for speed.
 
 coInitializeEx :: DWORD -> IO HResult
-coInitializeEx = liftA HResult . rawCoInitializeEx nullPtr
+coInitializeEx = fmap HResult . rawCoInitializeEx nullPtr
 
 coUninitialize :: IO ()
 coUninitialize = rawCoUninitialize
@@ -98,6 +101,28 @@ coRun f = do
 ------------------------------------------------------------------------
 -- Object creation
 --
+c_CLSCTX_INPROC_SERVER            :: DWORD
+c_CLSCTX_INPROC_HANDLER           :: DWORD
+c_CLSCTX_LOCAL_SERVER             :: DWORD
+c_CLSCTX_INPROC_SERVER16          :: DWORD
+c_CLSCTX_REMOTE_SERVER            :: DWORD
+c_CLSCTX_INPROC_HANDLER16         :: DWORD
+c_CLSCTX_RESERVED1                :: DWORD
+c_CLSCTX_RESERVED2                :: DWORD
+c_CLSCTX_RESERVED3                :: DWORD
+c_CLSCTX_RESERVED4                :: DWORD
+c_CLSCTX_NO_CODE_DOWNLOAD         :: DWORD
+c_CLSCTX_RESERVED5                :: DWORD
+c_CLSCTX_NO_CUSTOM_MARSHAL        :: DWORD
+c_CLSCTX_ENABLE_CODE_DOWNLOAD     :: DWORD
+c_CLSCTX_NO_FAILURE_LOG           :: DWORD
+c_CLSCTX_DISABLE_AAA              :: DWORD
+c_CLSCTX_ENABLE_AAA               :: DWORD
+c_CLSCTX_FROM_DEFAULT_CONTEXT     :: DWORD
+c_CLSCTX_ACTIVATE_32_BIT_SERVER   :: DWORD
+c_CLSCTX_ACTIVATE_64_BIT_SERVER   :: DWORD
+c_CLSCTX_ENABLE_CLOAKING          :: DWORD
+c_CLSCTX_PS_DLL                   :: DWORD
 
 c_CLSCTX_INPROC_SERVER            = 0x1        :: DWORD
 c_CLSCTX_INPROC_HANDLER           = 0x2        :: DWORD
@@ -122,14 +147,17 @@ c_CLSCTX_ACTIVATE_64_BIT_SERVER   = 0x80000    :: DWORD
 c_CLSCTX_ENABLE_CLOAKING          = 0x100000   :: DWORD
 c_CLSCTX_PS_DLL                   = 0x80000000 :: DWORD
 
+c_CLSCTX_INPROC :: DWORD
 c_CLSCTX_INPROC = c_CLSCTX_INPROC_SERVER .|.
                   c_CLSCTX_INPROC_HANDLER :: DWORD
 
+c_CLSCTX_ALL :: DWORD
 c_CLSCTX_ALL = c_CLSCTX_INPROC_SERVER  .|.
                c_CLSCTX_INPROC_HANDLER .|.
                c_CLSCTX_LOCAL_SERVER   .|.
                c_CLSCTX_REMOTE_SERVER  :: DWORD
 
+c_CLSCTX_SERVER :: DWORD
 c_CLSCTX_SERVER = c_CLSCTX_INPROC_SERVER .|.
                   c_CLSCTX_LOCAL_SERVER  .|.
                   c_CLSCTX_REMOTE_SERVER :: DWORD

@@ -1,6 +1,7 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE MagicHash #-}
+{-# OPTIONS -Wno-unsupported-calling-conventions #-}
 
 --
 -- COMCall.hs:
@@ -17,7 +18,6 @@ module System.Win32.HCOM.COMCall
 ) where
 
 import Control.Category hiding ((.), id)
-import Data.Void
 import Foreign
 import GHC.Exts
 

@@ -32,8 +32,8 @@ module System.Win32.HCOM
 , SAIndex
 , newSafeArrayM
 , newSafeArray
-, fromList
-, toList
+, fromList1D
+, toList1D
 , fromList2D
 , toList2D
 , (!)

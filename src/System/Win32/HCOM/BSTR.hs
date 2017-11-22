@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 -- Ditto.
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS -Wno-type-defaults #-}
 
 --
 -- BSTR.hs:

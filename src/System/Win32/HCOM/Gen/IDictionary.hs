@@ -33,4 +33,4 @@ dict_Exists :: (ToVariant k) => k -> COMPtr IDictionary -> IO Bool
 dict_Exists k dict = vcall dict "dict_Exists" 12 $ checkHR >>> vtArgInByRef k >>> argOut
 
 dict_Keys :: COMPtr IDictionary -> IO [Variant]
-dict_Keys dict = fmap (toList . unVT) $ vcall dict "dict_Keys" 15 $ checkHR >>> argOut
+dict_Keys dict = fmap (toList1D . unVT) $ vcall dict "dict_Keys" 15 $ checkHR >>> argOut

@@ -1,6 +1,7 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE EmptyDataDecls #-}
+{-# OPTIONS -Wno-unsupported-calling-conventions #-}
 
 --
 -- RawFunctions.hs:
