@@ -35,6 +35,14 @@ interface ISATest : IDispatch{
     HRESULT TestVariant([in, out] SAFEARRAY(VARIANT) array);
     // General test of passing variants through...
     HRESULT TestV([in, out] VARIANT *pVar);
+	
+
+	// Test primitive types
+	HRESULT TestDoubleValue([in] double inp, [out] double * outp);
+	HRESULT TestFloatValue([in] float inp, [out] float* outp);
+	HRESULT TestIntValue([in] int inp, [out] int * outp);
+	HRESULT TestLongValue([in] long inp, [out] long * outp);
+	HRESULT TestLongLongValue([in] long long inp, [out] long long * outp);
 };
 [
 	uuid(A5EFD00B-B1AD-429D-8018-AB69E0181404),

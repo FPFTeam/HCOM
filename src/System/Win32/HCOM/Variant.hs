@@ -11,7 +11,6 @@
 -- the Stackable instance
 module System.Win32.HCOM.Variant (Variant(..)) where
 
-import Control.Applicative
 import Control.Monad.Reader
 import qualified Data.ByteString.Char8 as B
 import Data.Time
@@ -64,9 +63,11 @@ data Variant = -- Non-array types.
              | VT_BOOL      Bool                -- ^ \-1 = True, 0 = False
              | VT_UNKNOWN   (COMPtr IUnknown)   -- ^ IUnknown *
              | VT_I1        Int8                -- ^ Signed char
+             | VT_I8        Int64               -- ^ Signed char
              | VT_UI1       Word8               -- ^ Unsigned char
              | VT_UI2       Word16              -- ^ Unsigned short
              | VT_UI4       Word32              -- ^ Unsigned long
+             | VT_UI8       Word64              -- ^ Unsigned long
              | VT_INT       Int                 -- ^ Signed machine int
              | VT_UINT      Word                -- ^ Unsigned machine int
              | VT_DECIMAL   Rational            -- ^ High precesion decimals
@@ -83,9 +84,11 @@ data Variant = -- Non-array types.
              | VT_VARIANTa  (SafeArray Variant)
              | VT_UNKNOWNa  (SafeArray (COMPtr IUnknown))
              | VT_I1a       (SafeArray Int8)
+             | VT_I8a       (SafeArray Int64)
              | VT_UI1a      (SafeArray Word8)
              | VT_UI2a      (SafeArray Word16)
              | VT_UI4a      (SafeArray Word32)
+             | VT_UI8a      (SafeArray Word64)
              | VT_INTa      (SafeArray Int)
              | VT_UINTa     (SafeArray Word)
                deriving (Show, Eq, Ord)
@@ -114,7 +117,7 @@ getVT p = peek $ castPtr p
 
 -- Set the type field.
 setVT :: Ptr VARIANT -> VARTYPE -> IO ()
-setVT p vt = poke (castPtr p) vt
+setVT p = poke (castPtr p)
 
 ------------------------------------------------------------------------
 -- Functions to marshal/unmarshal into given memory.
@@ -150,9 +153,11 @@ marshalVariant var ptr = do
     VT_BOOL      x -> write x
     VT_UNKNOWN   x -> write x
     VT_I1        x -> write x
+    VT_I8        x -> write x
     VT_UI1       x -> write x
     VT_UI2       x -> write x
     VT_UI4       x -> write x
+    VT_UI8       x -> write x
     VT_INT       x -> write x
     VT_UINT      x -> write x
     -- FIXME: Add support for marshalling VT_DECIMAL
@@ -170,9 +175,11 @@ marshalVariant var ptr = do
     VT_VARIANTa  x -> write x
     VT_UNKNOWNa  x -> write x
     VT_I1a       x -> write x
+    VT_I8a       x -> write x
     VT_UI1a      x -> write x
     VT_UI2a      x -> write x
     VT_UI4a      x -> write x
+    VT_UI8a      x -> write x
     VT_INTa      x -> write x
     VT_UINTa     x -> write x
 
@@ -196,9 +203,11 @@ unmarshalVariant ptr = do
           x | x == c_VT_BOOL     -> read   VT_BOOL
           x | x == c_VT_UNKNOWN  -> read   VT_UNKNOWN
           x | x == c_VT_I1       -> read   VT_I1
+          x | x == c_VT_I8       -> read   VT_I8
           x | x == c_VT_UI1      -> read   VT_UI1
           x | x == c_VT_UI2      -> read   VT_UI2
           x | x == c_VT_UI4      -> read   VT_UI4
+          x | x == c_VT_UI8      -> read   VT_UI8
           x | x == c_VT_INT      -> read   VT_INT
           x | x == c_VT_UINT     -> read   VT_UINT
           x | x == c_VT_DECIMAL  -> unmarshalDecimal ptr
@@ -216,9 +225,11 @@ unmarshalVariant ptr = do
           x | x == c_VT_VARIANT  -> read   VT_VARIANTa
           x | x == c_VT_UNKNOWN  -> read   VT_UNKNOWNa
           x | x == c_VT_I1       -> read   VT_I1a
+          x | x == c_VT_I8       -> read   VT_I8a
           x | x == c_VT_UI1      -> read   VT_UI1a
           x | x == c_VT_UI2      -> read   VT_UI2a
           x | x == c_VT_UI4      -> read   VT_UI4a
+          x | x == c_VT_UI8      -> read   VT_UI8a
           x | x == c_VT_INT      -> read   VT_INTa
           x | x == c_VT_UINT     -> read   VT_UINTa
           _ -> unsupportedTagError tag
@@ -236,31 +247,31 @@ unmarshalDecimal ptr = do
     read = fetch . castPtr . plusPtr ptr
     
 freeVariant :: Ptr VARIANT -> IO ()
-freeVariant ptr = do
-  rawVariantClear ptr
+freeVariant = rawVariantClear
 
 ------------------------------------------------------------------------
 -- Instance of Stackable.
 --
 
 instance Stackable Variant where
-    argIn x f = do
-      allocaBytes' sizeofVariant $ \ptr -> do
+    argIn x f =
+      allocaBytes' sizeofVariant $ \ptr ->
         bracket_' (marshalVariant x ptr)
                   (freeVariant ptr)
                   (do
                      -- Variant takes 4 words of the stack.
+                     -- XXX is this still true in x64
                      elts <- lift $ peekArray 4 $ castPtr ptr
-                     pushStack elts f)
+                     pushStack (map I elts) f)
 
-    argInByRef x f = do
-      allocaBytes' sizeofVariant $ \ptr -> do
+    argInByRef x f =
+      allocaBytes' sizeofVariant $ \ptr ->
         bracket_' (marshalVariant x ptr)
                   (freeVariant ptr)
                   (argIn ptr f)
 
-    argInOut x f = do
-      allocaBytes' sizeofVariant $ \ptr -> do
+    argInOut x f =
+      allocaBytes' sizeofVariant $ \ptr ->
         bracket_' (marshalVariant x ptr)
                   (freeVariant ptr)
                   (do

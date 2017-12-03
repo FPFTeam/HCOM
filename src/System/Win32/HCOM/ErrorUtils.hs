@@ -11,6 +11,7 @@ module System.Win32.HCOM.ErrorUtils
 ( getErrorInfo
 , checkHResult
 , checkHR
+, checkHRInner
 ) where
 
 import Control.Exception

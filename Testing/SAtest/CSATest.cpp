@@ -36,6 +36,7 @@ HRESULT STDMETHODCALLTYPE CSATest::MySAFunc2(SAFEARRAY * array)
 {
     // Contents are shorts.
 
+
     ::OutputDebugString(_T("Called MySAFunc2"));
 
     if (array == NULL) {
@@ -147,4 +148,54 @@ HRESULT STDMETHODCALLTYPE CSATest::TestV(VARIANT *pVar)
     ::OutputDebugString(_T("Called TestV"));
 
     return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSATest::TestDoubleValue(double inp, double * outp)
+{
+	TCHAR buffer[50];
+	swprintf(buffer, _T("Called TestDoubleValue(%f)"), inp);
+	::OutputDebugString(buffer);
+	*outp = inp + 1.0;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSATest::TestIntValue(int inp, int * outp)
+{
+	TCHAR buffer[50];
+	swprintf(buffer, _T("Called TestIntValue(%d)"), inp);
+	::OutputDebugString(buffer);
+	*outp = inp + 1;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSATest::TestLongValue(long inp, long * outp)
+{
+	TCHAR buffer[50];
+	swprintf(buffer, _T("Called TestLongValue(%ld)"), inp);
+	::OutputDebugString(buffer);
+	*outp = inp + 1;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSATest::TestLongLongValue(long long inp, long long * outp)
+{
+	TCHAR buffer[50];
+	swprintf(buffer, _T("Called TestLongLongValue(%lld)"), inp);
+	::OutputDebugString(buffer);
+	*outp = inp + 1;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CSATest::TestFloatValue(float inp, float * outp)
+{
+	TCHAR buffer[50];
+	swprintf(buffer, _T("Called TestIntValue(%f)"), inp);
+	::OutputDebugString(buffer);
+	*outp = inp + 1;
+
+	return S_OK;
 }

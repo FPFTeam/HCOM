@@ -23,10 +23,9 @@ module System.Win32.HCOM.ErrorBase
 import Prelude hiding (catch)
 #endif
 import Control.Exception
-import Control.Applicative
 import Data.Char
 import Data.Typeable
-import Foreign hiding (unsafePerformIO)
+import Foreign
 import Text.Printf
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -62,12 +61,15 @@ succeeded = not . failed
 -- Error message extraction.
 --
 
+c_FORMAT_MESSAGE_ALLOCATE_BUFFER :: DWORD
+c_FORMAT_MESSAGE_FROM_SYSTEM     :: DWORD
+c_FORMAT_MESSAGE_IGNORE_INSERTS  :: DWORD
 c_FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100 :: DWORD
 c_FORMAT_MESSAGE_FROM_SYSTEM     = 0x00001000 :: DWORD
 c_FORMAT_MESSAGE_IGNORE_INSERTS  = 0x00000200 :: DWORD
 
 stringForErrNo :: HRESULT -> IO String
-stringForErrNo hr = do
+stringForErrNo hr =
   bracket (alloca $ \strPtrDest ->
                do
                  i <- rawFormatMessageA (c_FORMAT_MESSAGE_ALLOCATE_BUFFER .|.
@@ -96,7 +98,7 @@ data ErrorInfo = ErrorInfo
 
 -- Gets to the nub of what people want to see in practice!
 instance Show ErrorInfo where
-    show ei = eiSource ei ++ ": " ++ eiDesc ei
+    show ei = eiSource ei ++ ": " ++ eiDesc ei ++ "(" ++ show (eiGUID ei) ++ ")"
 
 ------------------------------------------------------------------------
 -- COM error value

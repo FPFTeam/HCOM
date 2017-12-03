@@ -3,25 +3,25 @@
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 6.00.0366 */
-/* at Tue Jan 05 14:50:02 2010
+ /* File created by MIDL compiler version 8.00.0603 */
+/* at Sun Nov 12 16:23:42 2017
  */
-/* Compiler settings for .\SAtest.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run)
-    protocol : dce , ms_ext, c_ext
+/* Compiler settings for SAtest.idl:
+    Oicf, W1, Zp8, env=Win64 (32b run), target_arch=AMD64 8.00.0603 
+    protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
-//@@MIDL_FILE_HEADING(  )
+/* @@MIDL_FILE_HEADING(  ) */
 
 #pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 /* verify that the <rpcndr.h> version is high enough to compile this file*/
 #ifndef __REQUIRED_RPCNDR_H_VERSION__
-#define __REQUIRED_RPCNDR_H_VERSION__ 440
+#define __REQUIRED_RPCNDR_H_VERSION__ 475
 #endif
 
 #include "rpc.h"
@@ -48,6 +48,7 @@
 #ifndef __ISATest_FWD_DEFINED__
 #define __ISATest_FWD_DEFINED__
 typedef interface ISATest ISATest;
+
 #endif 	/* __ISATest_FWD_DEFINED__ */
 
 
@@ -71,8 +72,6 @@ typedef struct SATest SATest;
 extern "C"{
 #endif 
 
-void * __RPC_USER MIDL_user_allocate(size_t);
-void __RPC_USER MIDL_user_free( void * ); 
 
 #ifndef __ISATest_INTERFACE_DEFINED__
 #define __ISATest_INTERFACE_DEFINED__
@@ -119,6 +118,7 @@ EXTERN_C const IID IID_ISATest;
         
     };
     
+    
 #else 	/* C style interface */
 
     typedef struct ISATestVtbl
@@ -128,7 +128,8 @@ EXTERN_C const IID IID_ISATest;
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             ISATest * This,
             /* [in] */ REFIID riid,
-            /* [iid_is][out] */ void **ppvObject);
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
         
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             ISATest * This);
@@ -150,20 +151,28 @@ EXTERN_C const IID IID_ISATest;
             ISATest * This,
             /* [in] */ REFIID riid,
             /* [size_is][in] */ LPOLESTR *rgszNames,
-            /* [in] */ UINT cNames,
+            /* [range][in] */ UINT cNames,
             /* [in] */ LCID lcid,
             /* [size_is][out] */ DISPID *rgDispId);
         
         /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
             ISATest * This,
-            /* [in] */ DISPID dispIdMember,
-            /* [in] */ REFIID riid,
-            /* [in] */ LCID lcid,
-            /* [in] */ WORD wFlags,
-            /* [out][in] */ DISPPARAMS *pDispParams,
-            /* [out] */ VARIANT *pVarResult,
-            /* [out] */ EXCEPINFO *pExcepInfo,
-            /* [out] */ UINT *puArgErr);
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
         
         HRESULT ( STDMETHODCALLTYPE *MySAFunc1 )( 
             ISATest * This,
@@ -216,169 +225,60 @@ EXTERN_C const IID IID_ISATest;
 
 
 #define ISATest_QueryInterface(This,riid,ppvObject)	\
-    (This)->lpVtbl -> QueryInterface(This,riid,ppvObject)
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
 
 #define ISATest_AddRef(This)	\
-    (This)->lpVtbl -> AddRef(This)
+    ( (This)->lpVtbl -> AddRef(This) ) 
 
 #define ISATest_Release(This)	\
-    (This)->lpVtbl -> Release(This)
+    ( (This)->lpVtbl -> Release(This) ) 
 
 
 #define ISATest_GetTypeInfoCount(This,pctinfo)	\
-    (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo)
+    ( (This)->lpVtbl -> GetTypeInfoCount(This,pctinfo) ) 
 
 #define ISATest_GetTypeInfo(This,iTInfo,lcid,ppTInfo)	\
-    (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo)
+    ( (This)->lpVtbl -> GetTypeInfo(This,iTInfo,lcid,ppTInfo) ) 
 
 #define ISATest_GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)	\
-    (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId)
+    ( (This)->lpVtbl -> GetIDsOfNames(This,riid,rgszNames,cNames,lcid,rgDispId) ) 
 
 #define ISATest_Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)	\
-    (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr)
+    ( (This)->lpVtbl -> Invoke(This,dispIdMember,riid,lcid,wFlags,pDispParams,pVarResult,pExcepInfo,puArgErr) ) 
 
 
 #define ISATest_MySAFunc1(This,array)	\
-    (This)->lpVtbl -> MySAFunc1(This,array)
+    ( (This)->lpVtbl -> MySAFunc1(This,array) ) 
 
 #define ISATest_MySAFunc2(This,array)	\
-    (This)->lpVtbl -> MySAFunc2(This,array)
+    ( (This)->lpVtbl -> MySAFunc2(This,array) ) 
 
 #define ISATest_MySAFunc3(This,pArray)	\
-    (This)->lpVtbl -> MySAFunc3(This,pArray)
+    ( (This)->lpVtbl -> MySAFunc3(This,pArray) ) 
 
 #define ISATest_MySAFunc4(This,array,pRes)	\
-    (This)->lpVtbl -> MySAFunc4(This,array,pRes)
+    ( (This)->lpVtbl -> MySAFunc4(This,array,pRes) ) 
 
 #define ISATest_TestBool(This,array)	\
-    (This)->lpVtbl -> TestBool(This,array)
+    ( (This)->lpVtbl -> TestBool(This,array) ) 
 
 #define ISATest_TestBSTR(This,array)	\
-    (This)->lpVtbl -> TestBSTR(This,array)
+    ( (This)->lpVtbl -> TestBSTR(This,array) ) 
 
 #define ISATest_TestUnk(This,array)	\
-    (This)->lpVtbl -> TestUnk(This,array)
+    ( (This)->lpVtbl -> TestUnk(This,array) ) 
 
 #define ISATest_TestVariant(This,array)	\
-    (This)->lpVtbl -> TestVariant(This,array)
+    ( (This)->lpVtbl -> TestVariant(This,array) ) 
 
 #define ISATest_TestV(This,pVar)	\
-    (This)->lpVtbl -> TestV(This,pVar)
+    ( (This)->lpVtbl -> TestV(This,pVar) ) 
 
 #endif /* COBJMACROS */
 
 
 #endif 	/* C style interface */
 
-
-
-HRESULT STDMETHODCALLTYPE ISATest_MySAFunc1_Proxy( 
-    ISATest * This,
-    /* [in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_MySAFunc1_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_MySAFunc2_Proxy( 
-    ISATest * This,
-    /* [out][in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_MySAFunc2_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_MySAFunc3_Proxy( 
-    ISATest * This,
-    /* [out] */ SAFEARRAY * *pArray);
-
-
-void __RPC_STUB ISATest_MySAFunc3_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_MySAFunc4_Proxy( 
-    ISATest * This,
-    /* [in] */ SAFEARRAY * array,
-    /* [out] */ int *pRes);
-
-
-void __RPC_STUB ISATest_MySAFunc4_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_TestBool_Proxy( 
-    ISATest * This,
-    /* [out][in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_TestBool_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_TestBSTR_Proxy( 
-    ISATest * This,
-    /* [out][in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_TestBSTR_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_TestUnk_Proxy( 
-    ISATest * This,
-    /* [out][in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_TestUnk_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_TestVariant_Proxy( 
-    ISATest * This,
-    /* [out][in] */ SAFEARRAY * array);
-
-
-void __RPC_STUB ISATest_TestVariant_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
-
-
-HRESULT STDMETHODCALLTYPE ISATest_TestV_Proxy( 
-    ISATest * This,
-    /* [out][in] */ VARIANT *pVar);
-
-
-void __RPC_STUB ISATest_TestV_Stub(
-    IRpcStubBuffer *This,
-    IRpcChannelBuffer *_pRpcChannelBuffer,
-    PRPC_MESSAGE _pRpcMessage,
-    DWORD *_pdwStubPhase);
 
 
 

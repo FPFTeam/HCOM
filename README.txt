@@ -52,8 +52,6 @@ Files:
 Stack.hs:        Functions to help construct a call stack to be used
                  with the COM call.
 
-Thunk.s:         A little assembly stub used by COMCall.hs.
-
 COMCall.hs:      Given an object, vtbl entry and stack, invoke a COM
                  function.
 
@@ -117,6 +115,8 @@ Need to check for null pointers more carefully in returned values!
 
 When we do explicit memory management, make it exception-safe? (cf
 RAII in C++)
+
+Add handling for methods with >2 arguments in x64 (up to ~20 arguments supported in x86).
 
 References:
 -----------

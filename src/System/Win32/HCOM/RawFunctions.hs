@@ -1,6 +1,7 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE EmptyDataDecls #-}
+{-# OPTIONS -Wno-unsupported-calling-conventions #-}
 
 --
 -- RawFunctions.hs:
@@ -32,6 +33,12 @@ module System.Win32.HCOM.RawFunctions
 , rawVariantClear
 , rawSafeArrayCreate
 , rawSafeArrayDestroy
+, rawSafeArrayGetElemSize
+, rawSafeArrayGetDim
+, rawSafeArrayGetLBound
+, rawSafeArrayGetUBound
+, rawSafeArrayAccessData
+, rawSafeArrayUnaccessData
 , rawGetErrorInfo
 , rawLoadTypeLibEx
 , rawFormatMessageA
@@ -81,11 +88,18 @@ foreign import stdcall "SysFreeString"     rawSysFreeString     :: Ptr OLECHAR -
 foreign import stdcall "SysStringLen"      rawSysStringLen      :: Ptr OLECHAR ->          IO DWORD
 foreign import stdcall "VariantInit"       rawVariantInit       :: Ptr VARIANT -> IO ()
 foreign import stdcall "VariantClear"      rawVariantClear      :: Ptr VARIANT -> IO ()
-foreign import stdcall "SafeArrayCreate"   rawSafeArrayCreate   :: VARTYPE -> DWORD -> Ptr DWORD -> IO (Ptr SAFEARRAY)
-foreign import stdcall "SafeArrayDestroy"  rawSafeArrayDestroy  :: Ptr SAFEARRAY -> IO ()
 foreign import stdcall "GetErrorInfo"      rawGetErrorInfo      :: DWORD -> Ptr LPVOID -> IO HRESULT
 foreign import stdcall "LoadTypeLibEx"     rawLoadTypeLibEx     :: Ptr OLECHAR -> DWORD -> Ptr (Ptr ()) -> IO HRESULT
 foreign import stdcall "FormatMessageA"    rawFormatMessageA    :: DWORD -> LPVOID -> DWORD -> DWORD -> Ptr (Ptr Word8) -> DWORD -> LPVOID -> IO DWORD
 foreign import stdcall "LocalFree"         rawLocalFree         :: LPVOID -> IO LPVOID
 foreign import stdcall "CLSIDFromProgID"   rawCLSIDFromProgID   :: Ptr OLECHAR -> Ptr RawGUID -> IO HRESULT
-foreign import stdcall "CoCreateGuid"   rawCoCreateGuid  ::  Ptr RawGUID -> IO HRESULT
+foreign import stdcall "CoCreateGuid"      rawCoCreateGuid      :: Ptr RawGUID -> IO HRESULT
+foreign import stdcall "SafeArrayCreate"   rawSafeArrayCreate   :: VARTYPE -> DWORD -> Ptr DWORD -> IO (Ptr SAFEARRAY)
+foreign import stdcall "SafeArrayDestroy"  rawSafeArrayDestroy  :: Ptr SAFEARRAY -> IO ()
+foreign import stdcall "SafeArrayGetDim"   rawSafeArrayGetDim   :: Ptr SAFEARRAY -> IO Word32
+foreign import stdcall "SafeArrayGetLBound"rawSafeArrayGetLBound:: Ptr SAFEARRAY -> Word32 -> Ptr Word32 -> IO HRESULT -- Note that dims are indexed from 1
+foreign import stdcall "SafeArrayGetUBound"rawSafeArrayGetUBound:: Ptr SAFEARRAY -> Word32 -> Ptr Word32 -> IO HRESULT -- Note that dims are indexed from 1
+foreign import stdcall "SafeArrayGetElemsize" rawSafeArrayGetElemSize :: Ptr SAFEARRAY -> IO Word32
+foreign import stdcall "SafeArrayAccessData"  rawSafeArrayAccessData  :: Ptr SAFEARRAY -> Ptr (Ptr a) -> IO HRESULT
+foreign import stdcall "SafeArrayUnaccessData"  rawSafeArrayUnaccessData  :: Ptr SAFEARRAY -> IO HRESULT
+

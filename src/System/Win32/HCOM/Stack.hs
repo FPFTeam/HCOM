@@ -1,3 +1,4 @@
+{-# OPTIONS -Wno-overflowed-literals #-}
 -- This file is licensed under the New BSD License
 --
 -- Stack.hs:
@@ -10,6 +11,7 @@
 module System.Win32.HCOM.Stack
 ( Stackable(..) -- Things that can be put on a stack
 , Stack         -- A stack
+, SE(..)
 , (#<)          -- Stack evaluation
   -- For implementing stackable
 , StackM
@@ -24,7 +26,6 @@ module System.Win32.HCOM.Stack
 , withForeignPtr'
 ) where
 
-import Control.Applicative
 import Control.Arrow
 import Control.Exception
 import Control.Monad.Reader
@@ -37,8 +38,8 @@ import Foreign
 
 -- When we do a COM invocation, we need to build up an actual set of
 -- assembly-level concrete values on the stack. Since everything on
--- the COM stack is at least Word32-aligned, our core stack is of type
--- [Word32].
+-- the COM stack is at least Word-aligned, our core stack is of type
+-- [Word].
 --
 -- We'll do all our stack-building inside the I/O monad, to allow us
 -- to manipulate low-level chunks of memory when serialising
@@ -49,7 +50,7 @@ import Foreign
 -- We want to construct a stack, so let's build up the stack with a
 -- WriterT monad transformer to hold the built stack:
 --
--- type Stack = WriterT [Word32] IO ()
+-- type Stack = WriterT [Word] IO ()
 --
 -- Attempt #2:
 --
@@ -58,7 +59,7 @@ import Foreign
 -- given another operation Y, performs the set-up of X first, runs Y,
 -- and then the performs the teardown of X:
 --
--- type Stack = WriterT [Word32] IO a -> WriterT [Word32] IO a
+-- type Stack = WriterT [Word] IO a -> WriterT [Word] IO a
 --
 -- Attempt #3:
 --
@@ -67,7 +68,7 @@ import Foreign
 -- WriterT, to make the stack available to the COM call, which is the
 -- most deeply-nested operation!
 --
--- type Stack = ReaderT [Word32] IO a -> ReaderT [Word32] IO a
+-- type Stack = ReaderT [Word] IO a -> ReaderT [Word] IO a
 --
 -- Attempt #4:
 --
@@ -75,10 +76,15 @@ import Foreign
 -- make our Stack take a value, and instead of just pass it on, we'll
 -- modify it.
 --
--- type Stack a b = ReaderT [Word32] IO a -> ReaderT [Word32] IO b
+-- type Stack a b = ReaderT [Word] IO a -> ReaderT [Word] IO b
 --
 
-type StackM = ReaderT [Word32] IO
+-- | A stack element is a Word modelling either an Integer/pointer or a Floating point value.
+--   This distinction is only relevant in x64 due to the calling convention
+data SE = I Word | D Double
+  deriving Show
+
+type StackM = ReaderT [SE] IO
 
 type Stack a b = StackM a -> StackM b
 
@@ -100,13 +106,13 @@ class Stackable a where
 
 -- Evaluate a stack.
 infix 0 #<
-(#<) :: ([Word32] -> IO a) -> Stack a b -> IO b
+(#<) :: ([SE] -> IO a) -> Stack a b -> IO b
 fn #< stackOp =
     let innerOp = ask >>= (lift . fn)
      in runReaderT (stackOp innerOp) []
 
 -- Put stuff on a stack, then execute the next thing.
-pushStack :: [Word32] -> StackM a -> StackM a
+pushStack :: [SE] -> StackM a -> StackM a
 pushStack xs = local (xs ++)
 
 ------------------------------------------------------------------------
@@ -132,7 +138,7 @@ allocaBytes' :: Int -> (Ptr a -> StackM b) -> StackM b
 allocaBytes' = liftNest . allocaBytes
 
 bracket' :: IO a -> (a -> IO b) -> (a -> StackM c) -> StackM c
-bracket' a b c = liftNest (\c' -> bracket a b c') c
+bracket' a b = liftNest (\c' -> bracket a b c')
 
 bracket_' :: IO a -> IO b -> StackM c -> StackM c
 bracket_' a b c = liftNest (\c' -> bracket_ a b (c' ())) (const c)
@@ -149,14 +155,14 @@ withForeignPtr' = liftNest . withForeignPtr
 
 -- The nice thing about these types are that they are:
 -- a) Storable
--- b) Castable to Word32.
+-- b) Castable to Word.
 -- This makes it easy to write boilerplate for Stackable.
 
 -- NB: Our serialisation using 'fromIntegral' is rather dodgy, but
 -- works ok for little-endian systems.
 
 ai :: Integral a => a -> StackM b -> StackM b
-ai x f = pushStack [fromIntegral x] f
+ai x = pushStack [I $ fromIntegral x]
 
 aibr :: (Stackable a, Storable a) => a -> StackM b -> StackM b
 aibr x f = with' x $ \ptr -> argIn ptr f
@@ -173,9 +179,15 @@ ao f = alloca' $ \ptr -> do
          out <- lift $ peek ptr
          return (res, out)
 
-instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Int      where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Word     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int32    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+-- TODO This instance is only really supported in x64
+instance Stackable Int64    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word16   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+instance Stackable Word32   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
+-- TODO This instance is only really supported in x64
+instance Stackable Word64   where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int16    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Word8    where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
 instance Stackable Int8     where argIn = ai; argInByRef = aibr; argInOut = aio; argOut = ao
@@ -188,7 +200,7 @@ instance Stackable Int8     where argIn = ai; argInByRef = aibr; argInOut = aio;
 -- it's polite to initialise the out 'target' with a null pointer.
 
 instance Stackable (Ptr a)  where
-    argIn x    = ai (fromIntegral $ x `minusPtr` nullPtr :: Word32)
+    argIn x    = ai (fromIntegral $ x `minusPtr` nullPtr :: Word)
     argInByRef = aibr
     argInOut   = aio
     argOut     = aio nullPtr
@@ -197,11 +209,11 @@ instance Stackable (Ptr a)  where
 -- Marshalling of floating point types.
 --
 
-floatToRep :: Float -> IO [Word32]
+floatToRep :: Float -> IO [SE]
 floatToRep f = with f $ \p -> do
     let wp = castPtr p
     rep <- peek wp
-    return [rep]
+    return [D rep]
 
 instance Stackable Float  where
     argIn x f  = do rep <- lift $ floatToRep x ; pushStack rep f
@@ -209,12 +221,16 @@ instance Stackable Float  where
     argInOut   = aio
     argOut     = ao
 
-doubleToRep :: Double -> IO [Word32]
-doubleToRep f = with f $ \p -> do
-    let wp = castPtr p
-    lo <- peek wp
-    hi <- peekElemOff wp 1
-    return [lo, hi]
+doubleToRep :: Double -> IO [SE]
+doubleToRep f = with f $ \ptr ->
+  case sizeOf (undefined::Word) of
+    8 -> return [D f]
+    4 -> do
+      let loPtr = castPtr ptr
+      lo <- peek loPtr
+      hi <- peekElemOff loPtr 1
+      return [I lo, I hi] -- The distinction doesn't matter in the calling convention used in x86
+    _ -> error "unsupported"
 
 instance Stackable Double  where
     argIn  x f = do rep <- lift $ doubleToRep x ; pushStack rep f

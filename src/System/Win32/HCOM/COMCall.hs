@@ -1,5 +1,7 @@
 -- This file is licensed under the New BSD License
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE MagicHash #-}
+{-# OPTIONS -Wno-unsupported-calling-conventions #-}
 
 --
 -- COMCall.hs:
@@ -15,10 +17,9 @@ module System.Win32.HCOM.COMCall
 , rawVCall      -- Invoke a COM function.
 ) where
 
-import Control.Applicative
 import Control.Category hiding ((.), id)
-import Control.Monad
 import Foreign
+import GHC.Exts
 
 import System.Win32.HCOM.Flatten
 import System.Win32.HCOM.RawFunctions(HRESULT)
@@ -28,115 +29,115 @@ import System.Win32.HCOM.Stack
 -- 'vararg' invocation of 'thunk'.
 --
 
--- 'thunk' is our universal COM call entry point. It's simply a
--- vararg-style function whose first parameter is the address of the
--- function to call through to. This makes it simple to call any
--- stdcall function at any address.
+-- COM methods are function pointers. To avoid the need for a foreign
+-- import "dynamic" declaration for each COM method bound, this module
+-- defines a family of call functions. A call function takes a function
+-- pointer, a first argument corresponding to the COM object self reference,
+-- and 0 or more arguments for the COM method being called.
+-- The call function takes care of performing the invocation according
+-- to the system calling convention.
 
--- See Thunk.s for the (very simple) implementation.
-
--- On the other hand, FFI doesn't support varargs. Instead, we create
--- a whole set of different thunk functions, all calling the same
--- underlying function, but with different type signatures!
-
--- We then have a function which takes a list of parameters, and
+-- We then have a dispatch function which takes a list of parameters, and
 -- invokes the appropriate version of the thunk function based on the
 -- number of parameters.
 
--- This kind of thing tempts me to use Template Haskell, but I don't
--- think it's /quite/ worth it yet.
+-- The main source of complexity is the fast calling convention used in
+-- x64 architectures, which uses up to 4 integer registers and up to 4
+-- floating point registers, so the call functions must keep track of
+-- the numeric type of the arguments, up to 4 floating point arguments
+-- (pointers qualify as integral).
 
 -- FIXME: It could be argued that for a large number of arguments, we
 -- should have a separate thunk which just copies an area of memory
 -- onto the stack. We would then allocate an area, dump the list into
 -- it, and call that function instead.
 
-type F0  = IO Word32
-type F1  = Word32 -> F0
-type F2  = Word32 -> F1
-type F3  = Word32 -> F2
-type F4  = Word32 -> F3
-type F5  = Word32 -> F4
-type F6  = Word32 -> F5
-type F7  = Word32 -> F6
-type F8  = Word32 -> F7
-type F9  = Word32 -> F8
-type F10 = Word32 -> F9
-type F11 = Word32 -> F10
-type F12 = Word32 -> F11
-type F13 = Word32 -> F12
-type F14 = Word32 -> F13
-type F15 = Word32 -> F14
-type F16 = Word32 -> F15
-type F17 = Word32 -> F16
-type F18 = Word32 -> F17
-type F19 = Word32 -> F18
-type F20 = Word32 -> F19
-type F21 = Word32 -> F20
-type F22 = Word32 -> F21
-type F23 = Word32 -> F22
-type F24 = Word32 -> F23
-type F25 = Word32 -> F24
-type F26 = Word32 -> F25
+-- FIXME: Complete the family of call functions up to at least 10 arguments
+--        using Template Haskell.
 
-foreign import stdcall "thunk" thunk0  :: F0
-foreign import stdcall "thunk" thunk1  :: F1
-foreign import stdcall "thunk" thunk2  :: F2
-foreign import stdcall "thunk" thunk3  :: F3
-foreign import stdcall "thunk" thunk4  :: F4
-foreign import stdcall "thunk" thunk5  :: F5
-foreign import stdcall "thunk" thunk6  :: F6
-foreign import stdcall "thunk" thunk7  :: F7
-foreign import stdcall "thunk" thunk8  :: F8
-foreign import stdcall "thunk" thunk9  :: F9
-foreign import stdcall "thunk" thunk10 :: F10
-foreign import stdcall "thunk" thunk11 :: F11
-foreign import stdcall "thunk" thunk12 :: F12
-foreign import stdcall "thunk" thunk13 :: F13
-foreign import stdcall "thunk" thunk14 :: F14
-foreign import stdcall "thunk" thunk15 :: F15
-foreign import stdcall "thunk" thunk16 :: F16
-foreign import stdcall "thunk" thunk17 :: F17
-foreign import stdcall "thunk" thunk18 :: F18
-foreign import stdcall "thunk" thunk19 :: F19
-foreign import stdcall "thunk" thunk20 :: F20
-foreign import stdcall "thunk" thunk21 :: F21
-foreign import stdcall "thunk" thunk22 :: F22
-foreign import stdcall "thunk" thunk23 :: F23
-foreign import stdcall "thunk" thunk24 :: F24
-foreign import stdcall "thunk" thunk25 :: F25
-foreign import stdcall "thunk" thunk26 :: F26
+type I0  = IO  Word32
+type I                         = Word   -> I0
+type D                         = Double -> I0
+type II                        = Word   -> I
+type ID                        = Word   -> D
+type DI                        = Double -> I
+type DD                        = Double -> D
+type III                       = Word   -> II
+type IID                       = Word   -> ID
+type IDI                       = Word   -> DI
+type IDD                       = Word   -> DD
+type IIII                      = Word   -> III
+type IIIII                     = Word   -> IIII
+type IIIIII                    = Word   -> IIIII
+type IIIIIII                   = Word   -> IIIIII
+type IIIIIIII                  = Word   -> IIIIIII
+type IIIIIIIII                 = Word   -> IIIIIIII
+type IIIIIIIIII                = Word   -> IIIIIIIII
+type IIIIIIIIIII               = Word   -> IIIIIIIIII
+type IIIIIIIIIIII              = Word   -> IIIIIIIIIII
+type IIIIIIIIIIIII             = Word   -> IIIIIIIIIIII
+type IIIIIIIIIIIIII            = Word   -> IIIIIIIIIIIII
+type IIIIIIIIIIIIIII           = Word   -> IIIIIIIIIIIIII
+type IIIIIIIIIIIIIIII          = Word   -> IIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIII         = Word   -> IIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIII        = Word   -> IIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIII       = Word   -> IIIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIIII      = Word   -> IIIIIIIIIIIIIIIIIII
+type IIIIIIIIIIIIIIIIIIIII     = Word   -> IIIIIIIIIIIIIIIIIIII
 
-callThunk :: [Word32] -> IO Word32
+foreign import stdcall "dynamic" _I                    :: FunPtr I                    -> I
+foreign import stdcall "dynamic" _II                   :: FunPtr II                   -> II
+foreign import stdcall "dynamic" _ID                   :: FunPtr ID                   -> ID
+foreign import stdcall "dynamic" _III                  :: FunPtr III                  -> III
+foreign import stdcall "dynamic" _IID                  :: FunPtr IID                  -> IID
+foreign import stdcall "dynamic" _IDI                  :: FunPtr IDI                  -> IDI
+foreign import stdcall "dynamic" _IDD                  :: FunPtr IDD                  -> IDD
+foreign import stdcall "dynamic" _IIII                 :: FunPtr IIII                 -> IIII
+foreign import stdcall "dynamic" _IIIII                :: FunPtr IIIII                -> IIIII
+foreign import stdcall "dynamic" _IIIIII               :: FunPtr IIIIII               -> IIIIII
+foreign import stdcall "dynamic" _IIIIIII              :: FunPtr IIIIIII              -> IIIIIII
+foreign import stdcall "dynamic" _IIIIIIII             :: FunPtr IIIIIIII             -> IIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIII            :: FunPtr IIIIIIIII            -> IIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIII           :: FunPtr IIIIIIIIII           -> IIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIII          :: FunPtr IIIIIIIIIII          -> IIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIII         :: FunPtr IIIIIIIIIIII         -> IIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIII        :: FunPtr IIIIIIIIIIIII        -> IIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIII       :: FunPtr IIIIIIIIIIIIII       -> IIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIII      :: FunPtr IIIIIIIIIIIIIII      -> IIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIII     :: FunPtr IIIIIIIIIIIIIIII     -> IIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIII    :: FunPtr IIIIIIIIIIIIIIIII    -> IIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIII   :: FunPtr IIIIIIIIIIIIIIIIII   -> IIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIII  :: FunPtr IIIIIIIIIIIIIIIIIII  -> IIIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIIII :: FunPtr IIIIIIIIIIIIIIIIIIII -> IIIIIIIIIIIIIIIIIIII
+foreign import stdcall "dynamic" _IIIIIIIIIIIIIIIIIIIII:: FunPtr IIIIIIIIIIIIIIIIIIIII-> IIIIIIIIIIIIIIIIIIIII
 
-callThunk []                                                    = thunk0
-callThunk [a]                                                   = thunk1  a
-callThunk [a,b]                                                 = thunk2  a b
-callThunk [a,b,c]                                               = thunk3  a b c
-callThunk [a,b,c,d]                                             = thunk4  a b c d
-callThunk [a,b,c,d,e]                                           = thunk5  a b c d e
-callThunk [a,b,c,d,e,f]                                         = thunk6  a b c d e f
-callThunk [a,b,c,d,e,f,g]                                       = thunk7  a b c d e f g
-callThunk [a,b,c,d,e,f,g,h]                                     = thunk8  a b c d e f g h
-callThunk [a,b,c,d,e,f,g,h,i]                                   = thunk9  a b c d e f g h i
-callThunk [a,b,c,d,e,f,g,h,i,j]                                 = thunk10 a b c d e f g h i j
-callThunk [a,b,c,d,e,f,g,h,i,j,k]                               = thunk11 a b c d e f g h i j k
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l]                             = thunk12 a b c d e f g h i j k l
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m]                           = thunk13 a b c d e f g h i j k l m
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n]                         = thunk14 a b c d e f g h i j k l m n
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]                       = thunk15 a b c d e f g h i j k l m n o
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p]                     = thunk16 a b c d e f g h i j k l m n o p
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q]                   = thunk17 a b c d e f g h i j k l m n o p q
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r]                 = thunk18 a b c d e f g h i j k l m n o p q r
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s]               = thunk19 a b c d e f g h i j k l m n o p q r s
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t]             = thunk20 a b c d e f g h i j k l m n o p q r s t
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u]           = thunk21 a b c d e f g h i j k l m n o p q r s t u
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v]         = thunk22 a b c d e f g h i j k l m n o p q r s t u v
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w]       = thunk23 a b c d e f g h i j k l m n o p q r s t u v w
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x]     = thunk24 a b c d e f g h i j k l m n o p q r s t u v w x
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y]   = thunk25 a b c d e f g h i j k l m n o p q r s t u v w x y
-callThunk [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z] = thunk26 a b c d e f g h i j k l m n o p q r s t u v w x y z
-callThunk _ = error "Internal error in vcall: Too many arguments."
+{-# INLINE call #-}
+call :: [SE] -> IO HRESULT
+call [I funptr,I a]                                                                             = _I                    (word2ptr funptr) a
+call [I funptr,I a,I b]                                                                         = _II                   (word2ptr funptr) a b
+call [I funptr,I a,D b]                                                                         = _ID                   (word2ptr funptr) a b
+call [I funptr,I a,I b,I c]                                                                     = _III                  (word2ptr funptr) a b c
+call [I funptr,I a,I b,D c]                                                                     = _IID                  (word2ptr funptr) a b c
+call [I funptr,I a,D b,I c]                                                                     = _IDI                  (word2ptr funptr) a b c
+call [I funptr,I a,D b,D c]                                                                     = _IDD                  (word2ptr funptr) a b c
+call [I funptr,I a,I b,I c,I d]                                                                 = _IIII                 (word2ptr funptr) a b c d
+call [I funptr,I a,I b,I c,I d,I e]                                                             = _IIIII                (word2ptr funptr) a b c d e
+call [I funptr,I a,I b,I c,I d,I e,I f]                                                         = _IIIIII               (word2ptr funptr) a b c d e f
+call [I funptr,I a,I b,I c,I d,I e,I f,I g]                                                     = _IIIIIII              (word2ptr funptr) a b c d e f g
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h]                                                 = _IIIIIIII             (word2ptr funptr) a b c d e f g h
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i]                                             = _IIIIIIIII            (word2ptr funptr) a b c d e f g h i
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j]                                         = _IIIIIIIIII           (word2ptr funptr) a b c d e f g h i j
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k]                                     = _IIIIIIIIIII          (word2ptr funptr) a b c d e f g h i j k
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l]                                 = _IIIIIIIIIIII         (word2ptr funptr) a b c d e f g h i j k l
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m]                             = _IIIIIIIIIIIII        (word2ptr funptr) a b c d e f g h i j k l m
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n]                         = _IIIIIIIIIIIIII       (word2ptr funptr) a b c d e f g h i j k l m n
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o]                     = _IIIIIIIIIIIIIII      (word2ptr funptr) a b c d e f g h i j k l m n o
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p]                 = _IIIIIIIIIIIIIIII     (word2ptr funptr) a b c d e f g h i j k l m n o p
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q]             = _IIIIIIIIIIIIIIIII    (word2ptr funptr) a b c d e f g h i j k l m n o p q
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r]         = _IIIIIIIIIIIIIIIIII   (word2ptr funptr) a b c d e f g h i j k l m n o p q r
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r,I s]     = _IIIIIIIIIIIIIIIIIII  (word2ptr funptr) a b c d e f g h i j k l m n o p q r s
+call [I funptr,I a,I b,I c,I d,I e,I f,I g,I h,I i,I j,I k,I l,I m,I n,I o,I p,I q,I r,I s,I t] = _IIIIIIIIIIIIIIIIIIII (word2ptr funptr) a b c d e f g h i j k l m n o p q r s t
+call _ = error "Internal error in vcall: Too many arguments. Use Template Haskell to generate all the possibilities."
 
 ------------------------------------------------------------------------
 -- COM function invocation.
@@ -154,11 +155,15 @@ rawVCall obj idx args = do
   vtbl <- peek (castPtr obj :: Ptr VTblPtr)
   -- Index into it to get the appropriate function.
   fn   <- peekElemOff vtbl idx
-  -- Cast our parameter list into a set of Word32s we can construct a
+  -- Cast our parameter list into a set of Voids we can construct a
   -- stack from, and then invoke the function.
   let fullArgs = argIn fn >>> argIn obj >>> args
   -- Our thunk should be wrapped up to put the HResult into a
   -- pseudo-list format we can then flatten.
-      thunk = liftM ((,) ()) . callThunk
+      thunk = fmap ((,) ()) . fmap fromIntegral . call
   -- Finally, do the invocation and flatten the result into a plain tuple.
-  flatten <$> (thunk #< fullArgs)
+  res <- flatten <$> (thunk #< fullArgs)
+  return res
+
+word2ptr :: Word   -> FunPtr a
+word2ptr (W# w)= castPtrToFunPtr $ Ptr (int2Addr# (word2Int# w))

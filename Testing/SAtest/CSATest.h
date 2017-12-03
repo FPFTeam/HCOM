@@ -78,6 +78,12 @@ public:
 
     virtual HRESULT STDMETHODCALLTYPE TestV( 
         /* [out][in] */ VARIANT *pVar);
+
+	virtual HRESULT STDMETHODCALLTYPE TestDoubleValue(double inp, double * outp);
+	virtual HRESULT STDMETHODCALLTYPE TestLongValue(long inp, long * outp);
+	virtual HRESULT STDMETHODCALLTYPE TestLongLongValue(long  long inp, long long * outp);
+	virtual HRESULT STDMETHODCALLTYPE TestIntValue(int inp, int * outp);
+	virtual HRESULT STDMETHODCALLTYPE TestFloatValue(float inp, float * outp);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SATest), CSATest)
